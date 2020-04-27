@@ -91,6 +91,9 @@ def score(dodged):
 def refuel(fuel_level):
     display_message('Fuel: '+str(fuel_level), color=red, center=False, x=0, y=30)
 
+def life(lives):
+    display_message('Lives: '+str(lives), color=blue, center=False, x=0, y=60)
+
 def crash():
     display_message('You Crashed', font=largefont, color=red)
     pygame.display.update()

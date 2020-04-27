@@ -7,6 +7,9 @@ pygame.init()
 # Global
 gameExit = False
 gameIntro = True
+lives = 3
+dodged = 0
+fuel_level = 20
 
 # RGB - Read Green Blue
 black           =   (0,0,0)
@@ -95,7 +98,20 @@ def life(lives):
     display_message('Lives: '+str(lives), color=blue, center=False, x=0, y=60)
 
 def crash():
-    display_message('You Crashed', font=largefont, color=red)
+    global lives
+    global fuel_level
+    global dodged
+    lives += -1
+    life(lives)
+    if lives > 0:
+        display_message('You Crashed', font=largefont, color=red)
+    else:
+        #display_message('Game Over', font=largefont, color=red)
+        pause(msg1='Game Over', msg1_font=largefont, msg1_y_displace=-40)
+        lives = 3
+        dodged = 0
+        fuel_level = 20
+
     pygame.display.update()
     time.sleep(2)
     # Clean the display to prevent overlapping text
@@ -108,7 +124,7 @@ def exit_the_game():
     pygame.quit()
     quit()
 
-def pause():
+def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
     paused = True
     while paused:
         for event in pygame.event.get():
@@ -121,7 +137,7 @@ def pause():
         if gameIntro:
             gameDisplay.fill(white)
 
-        display_message('Paused', font=medfont, color=red, y_displace=-20)
+        display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
         display_message('Press C to Continue or Q to Quit', font=smallfont,\
             color=blue, y_displace=20)
 
@@ -149,15 +165,20 @@ def game_intro():
         clock.tick(15)
 
 def game_loop():
+    global gameIntro
+    gameIntro = False
+    global gameExit
+    gameExit = False
+    global lives
+    global fuel_level
+    global dodged
+
     x = (display_width * 0.45)
     y = (display_height * 0.8)
     
     x_change = 0 
     y_change = 0
-
-    dodged = 0
-    fuel_level = 20
-
+    
     # Obstacles
     objects = [
         {'type': 'obstacle', 'speed' : 5, 'shape' : 'rect', 'color' : black,\
@@ -183,10 +204,6 @@ def game_loop():
                 'width' : 40, 'height' : 48}
     ])
 
-    global gameIntro
-    gameIntro = False
-    global gameExit
-    gameExit = False
     while not gameExit:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -230,6 +247,7 @@ def game_loop():
         car(x,y)
         score(dodged)
         refuel(fuel_level)
+        life(lives)
         
         # Check for colision with the left and right boundary.
         if x > display_width - car_width or x < 0:

@@ -94,26 +94,26 @@ def score(dodged):
 def refuel(fuel_level):
     display_message('Fuel: '+str(fuel_level), color=red, center=False, x=0, y=30)
 
-def life(lives):
-    display_message('Lives: '+str(lives), color=blue, center=False, x=0, y=60)
+def life(lives, color=blue):
+    display_message('Lives: '+str(lives), color=color, center=False, x=0, y=60)
 
 def crash():
     global lives
     global fuel_level
     global dodged
+    life(lives, color=white)
     lives += -1
     life(lives)
     if lives > 0:
         display_message('You Crashed', font=largefont, color=red)
+        pygame.display.update()
+        time.sleep(2)
     else:
-        #display_message('Game Over', font=largefont, color=red)
-        pause(msg1='Game Over', msg1_font=largefont, msg1_y_displace=-40)
+        pause(msg1='Game Over', msg1_font=largefont, msg1_y_displace=-60)
         lives = 3
         dodged = 0
         fuel_level = 20
 
-    pygame.display.update()
-    time.sleep(2)
     # Clean the display to prevent overlapping text
     # in case of pause directly after comming back to game_loop(). 
     gameDisplay.fill(white)

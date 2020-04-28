@@ -225,7 +225,7 @@ def game_loop():
                 elif event.key == pygame.K_UP:
                     y_change = 3
 
-            print(event)
+            #print(event)
         
         x += x_change
         y += y_change

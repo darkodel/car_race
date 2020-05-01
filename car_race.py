@@ -29,13 +29,12 @@ bright_blue     =   (0,0,255)
 # Display
 display_width   = 800
 display_height  = 600
-#display_caption = 'A bit Racey'
 display_caption = config_data['display_caption']
 
 #Player
-default_player = config_data["players"]["last_player"]
+#default_player = config_data["players"]["last_player"]
+default_player = config.load_score_history()['last_player']
 player = default_player
-#player = 'Darko'
 
 # Intro buttons
 """ bIntro_x = (150, 550, 550)
@@ -61,6 +60,7 @@ medfont = pygame.font.SysFont('comicsansms', 50)
 largefont = pygame.font.SysFont('comicsansms', 80)
 
 # Functions
+# Display objects: rect, circle and image.
 def object(ob):
     if ob['shape'] == 'rect':
         pygame.draw.rect(gameDisplay, ob['color'],\
@@ -72,6 +72,7 @@ def object(ob):
         img = pygame.image.load(ob['file'])
         gameDisplay.blit(img, (ob['x'], ob['y']))
 
+# Display the car.
 def car(x,y):
     gameDisplay.blit(carImg, (x,y))
 
@@ -108,8 +109,12 @@ def display_button(x, y, width, height, color, caption=None, action=None, action
     display_message(caption, x=x+(width/2), y=y+(height/2))
 
 def new_player(new_player):
-    global choosePlayer
-    choosePlayer = False
+    score_history = config.load_score_history()
+    # Check if this name is available.
+    for p in score_history['player']:
+        if p['name'] == new_player: # This player already exists.
+            set_player(new_player)
+    config.create_new_player(new_player)
     set_player(new_player)
 
 def set_player(new_player):
@@ -144,27 +149,22 @@ def choose_player():
 
         
             # Choose/add player.
-            """ display_button(x_pl, y_pl, width, height, color, caption='enter new player',\
-                action=new_player, action_param='Darko') """
             entered = display_button(x_pl, y_pl, width, height, color, caption=text)
             if entered:
                 text = ''
                 textInput = True
             if textInput:
-                """ print('enter new user')
-                entered = False """
                 if event.type == pygame.KEYDOWN:
                     print(event)
                     if event.key == pygame.K_RETURN:
-                        new_player('text')
+                        new_player(text)
                     elif event.key == pygame.K_BACKSPACE:
                         text = text[:-1]
                     elif event.key == pygame.K_ESCAPE:
                         textInput = False
                     else:
-                        print(event.key)
-                        print(pygame.key.name(event.key))
-                        #event.key
+                        #print(event.key)
+                        #print(pygame.key.name(event.key))
                         text += pygame.key.name(event.key)
             
             y_pl += height+10
@@ -259,11 +259,6 @@ def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
                     paused = False
                 if event.key == pygame.K_q:
                     exit_the_game()
-        
-        """ if msg1 == 'Game Over':
-            display_button(bIntro_x[2], bIntro_y[2], bIntro_width[2], bIntro_height[2],\
-                bIntro_color[2], caption=bIntro_caption[2], action=bIntro_action[2])
-            pygame.display.update() """
 
         clock.tick(5)
 
@@ -287,7 +282,7 @@ def display_score_history(your_last_score, your_best_score, best_score):
 def game_intro():
     # game_loop and pause can not be defined in the begining of this file.
     bIntro_action = (game_loop, pause, choose_player)
-
+    
     global your_last_score, your_best_score, best_score
     your_last_score, your_best_score, best_score = get_score_history()
           

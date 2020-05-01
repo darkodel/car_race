@@ -9,11 +9,19 @@ def load_config(config_file_path='config.json'):
 def edit_score_history(data, score_history_path='.players.json'):
     with open(score_history_path, 'w+') as score_history:
         json.dump(data, score_history)
-        
+
 def create_score_history():
     data = load_config()
     empty_score_history = data['players']
     edit_score_history(empty_score_history)
+
+def create_new_player(new_player):
+    data = load_config()
+    new_player_score_history = data['players']['player'] # get player's section
+    new_player_score_history[0]['name'] = new_player # insert new player name
+    data = load_score_history() # load the whole score history
+    data['player'].append(new_player_score_history[0]) # extend it with new player
+    edit_score_history(data) # write it back to the file
 
 def load_score_history(score_history_path='.players.json'):
     try:

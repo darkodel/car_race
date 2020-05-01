@@ -1,5 +1,6 @@
 import pygame
 import time
+from datetime import datetime
 import random
 import config
 
@@ -31,9 +32,9 @@ display_height  = 600
 display_caption = config_data['display_caption']
 
 #Player
-#default_player = 'Racer no 1'
 default_player = config_data["players"]["last_player"]
 player = default_player
+player = 'Darko'
 
 # Intro buttons
 bIntro_x = (150, 550, 550)
@@ -126,14 +127,21 @@ def crash():
     else:
         pause(msg1='Game Over', msg1_font=largefont, msg1_y_displace=-60)
         
+        now = datetime.now()
+        time_stamp = now.strftime("%Y-%m-%d %T")
+
         score_history = config.load_score_history()
 
         score_history['last_player'] = player
-        #score_history['best_score'] = 123
-        p[0] = {'name' : player, 'score' : dodged}
-        p[1] = {'name' : 'Darko', 'score' : dodged*3}
-        p[2] = {'name' : 'Maja', 'score' : dodged*5}
-        score_history['player'] = p
+        # Find/add player and update it's score.
+        for p in score_history['player']:
+            if p['name'] == player:
+                p['last_score'] = dodged
+                p['last_score_date'] = time_stamp
+                if p['best_score'] < dodged:
+                    p['best_score'] = dodged
+                    p['best_score_date'] = time_stamp
+
         config.edit_score_history(score_history)
 
         lives = 3

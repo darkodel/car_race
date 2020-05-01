@@ -11,6 +11,7 @@ config_data = config.load_config()
 # Global
 gameExit = False
 gameIntro = True
+choosePlayer = False
 lives = 3
 dodged = 0
 fuel_level = 20
@@ -44,7 +45,7 @@ bIntro_x = (150, 550, 350)
 bIntro_y = (450, 450, 10)
 bIntro_width = (100, 100, 180)
 bIntro_height = (50, 50, 50)
-bIntro_color = ((green, bright_green), (red, bright_red), (blue, bright_blue))
+bIntro_color = ((green, bright_green), (red, bright_red), (green, bright_green))
 bIntro_caption = ('GO!', 'Quit', 'Change player')
 # game_loop and pause can not be refered before they are defined
 # bIntro_action = (game_loop, pause) is moved to game_intro()
@@ -87,23 +88,93 @@ def display_message(text, font=smallfont, color=black,\
         textRect = textRect.move(x+x_displace, y+y_displace)
     gameDisplay.blit(textSurf, textRect)
 
-def display_button(x, y, width, height, color, caption=None, action=None):
+def display_button(x, y, width, height, color, caption=None, action=None, action_param=None):
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
-    #print(mouse)
-    #print(click)
+    print(mouse)
+    print(click)
     if y+height > mouse[1] > y and x+width > mouse[0] > x:
         pygame.draw.rect(gameDisplay, color[1], (x, y, width, height))
         if click[0] == 1 and action != None:
-            action()
+            if action_param == None:
+                action()
+            else:
+                action(action_param)
+        elif click[0] == 1 and action == None:
+            return(True) # button/text fieled has been chosen
     else:
         pygame.draw.rect(gameDisplay, color[0], (x, y, width, height))
         
     display_message(caption, x=x+(width/2), y=y+(height/2))
 
-def edit_player():
-    None
+def new_player(new_player):
+    global choosePlayer
+    choosePlayer = False
+    set_player(new_player)
 
+def set_player(new_player):
+    global choosePlayer
+    choosePlayer = False
+    global player
+    player = new_player
+    global your_last_score, your_best_score, best_score 
+    your_last_score, your_best_score, best_score = get_score_history()
+
+def choose_player():
+    global choosePlayer
+    choosePlayer = True
+    score_history = config.load_score_history()
+    
+    x_pl = (display_width/2)-200
+    width = 200
+    height = 50
+    color = (green, bright_green)
+    
+    text = 'enter new player'
+    entered = False
+    textInput = False
+
+    while choosePlayer:
+        y_pl = 30
+        gameDisplay.fill(white)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pause()
+                gameIntro = False
+
+        
+            # Choose/add player.
+            """ display_button(x_pl, y_pl, width, height, color, caption='enter new player',\
+                action=new_player, action_param='Darko') """
+            entered = display_button(x_pl, y_pl, width, height, color, caption=text)
+            if entered:
+                text = ''
+                textInput = True
+            if textInput:
+                """ print('enter new user')
+                entered = False """
+                if event.type == pygame.KEYDOWN:
+                    print(event)
+                    if event.key == pygame.K_RETURN:
+                        new_player('text')
+                    elif event.key == pygame.K_BACKSPACE:
+                        text = text[:-1]
+                    elif event.key == pygame.K_ESCAPE:
+                        textInput = False
+                    else:
+                        print(event.key)
+                        print(pygame.key.name(event.key))
+                        #event.key
+                        text += pygame.key.name(event.key)
+            
+            y_pl += height+10
+            for p in score_history['player']:
+                display_button(x_pl, y_pl, width, height, color, caption=p['name'],\
+                    action=set_player, action_param=p['name'])
+                y_pl += height+10
+            
+            pygame.display.update()
+            clock.tick(15)
 
 def score(dodged):
     display_message('Score: '+str(dodged), color=green, center=False, x=0, y=0)
@@ -172,7 +243,7 @@ def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
         your_last_score, your_best_score, best_score = get_score_history()
         display_score_history(your_last_score, your_best_score, best_score)
 
-    bIntro_action = (game_loop, pause, edit_player)
+    bIntro_action = (game_loop, pause, choose_player)
     if gameIntro:
         gameDisplay.fill(white)
 
@@ -189,10 +260,10 @@ def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
                 if event.key == pygame.K_q:
                     exit_the_game()
         
-        if msg1 == 'Game Over':
+        """ if msg1 == 'Game Over':
             display_button(bIntro_x[2], bIntro_y[2], bIntro_width[2], bIntro_height[2],\
                 bIntro_color[2], caption=bIntro_caption[2], action=bIntro_action[2])
-            pygame.display.update()
+            pygame.display.update() """
 
         clock.tick(5)
 
@@ -215,10 +286,11 @@ def display_score_history(your_last_score, your_best_score, best_score):
 
 def game_intro():
     # game_loop and pause can not be defined in the begining of this file.
-    bIntro_action = (game_loop, pause, edit_player)
+    bIntro_action = (game_loop, pause, choose_player)
 
+    global your_last_score, your_best_score, best_score
     your_last_score, your_best_score, best_score = get_score_history()
-    
+          
     global gameIntro
     while gameIntro:
         for event in pygame.event.get():

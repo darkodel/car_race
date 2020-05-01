@@ -1,8 +1,11 @@
 import pygame
 import time
 import random
+import config
 
 pygame.init()
+
+config_data = config.load_config()
 
 # Global
 gameExit = False
@@ -24,15 +27,21 @@ bright_blue     =   (0,0,255)
 # Display
 display_width   = 800
 display_height  = 600
-display_caption = 'A bit Racey'
+#display_caption = 'A bit Racey'
+display_caption = config_data['display_caption']
+
+#Player
+#default_player = 'Racer no 1'
+default_player = config_data["players"]["last_player"]
+player = default_player
 
 # Intro buttons
-bIntro_x = (150, 550)
-bIntro_y = (450, 450)
+bIntro_x = (150, 550, 550)
+bIntro_y = (450, 450, 70)
 bIntro_width = 100
 bIntro_height = 50
-bIntro_color = ((green, bright_green), (red, bright_red))
-bIntro_caption = ('GO!', 'Quit')
+bIntro_color = ((green, bright_green), (red, bright_red), (blue, bright_blue))
+bIntro_caption = ('GO!', 'Quit', 'Edit')
 # game_loop and pause can not be refered before they are defined
 # bIntro_action = (game_loop, pause) is moved to game_intro()
 
@@ -88,6 +97,10 @@ def display_button(x, y, width, height, color, caption=None, action=None):
         
     display_message(caption, x=x+(width/2), y=y+(height/2))
 
+def edit_player():
+    None
+
+
 def score(dodged):
     display_message('Score: '+str(dodged), color=green, center=False, x=0, y=0)
 
@@ -101,6 +114,8 @@ def crash():
     global lives
     global fuel_level
     global dodged
+    score_history = {}
+    p = {}
     life(lives, color=white)
     lives += -1
     life(lives)
@@ -110,6 +125,17 @@ def crash():
         time.sleep(2)
     else:
         pause(msg1='Game Over', msg1_font=largefont, msg1_y_displace=-60)
+        
+        score_history = config.load_score_history()
+
+        score_history['last_player'] = player
+        #score_history['best_score'] = 123
+        p[0] = {'name' : player, 'score' : dodged}
+        p[1] = {'name' : 'Darko', 'score' : dodged*3}
+        p[2] = {'name' : 'Maja', 'score' : dodged*5}
+        score_history['player'] = p
+        config.edit_score_history(score_history)
+
         lives = 3
         dodged = 0
         fuel_level = 20
@@ -145,7 +171,8 @@ def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
         clock.tick(5)
 
 def game_intro():
-    bIntro_action = (game_loop, pause)
+    # game_loop and pause can not be defined in the begining of this file.
+    bIntro_action = (game_loop, pause, edit_player)
 
     global gameIntro
     while gameIntro:
@@ -156,8 +183,10 @@ def game_intro():
 
         gameDisplay.fill(white)
         display_message('A car race', font=medfont, color=red, y_displace=-20)
+        display_message('Player:', center=False, x=550, y=0)
+        display_message(player, color=bright_blue, center=False, x=550, y=30)
         
-        for i in range(2):
+        for i in range(len(bIntro_action)):
             display_button(bIntro_x[i], bIntro_y[i], bIntro_width, bIntro_height,\
                 bIntro_color[i], caption=bIntro_caption[i], action=bIntro_action[i])
 

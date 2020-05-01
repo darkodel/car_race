@@ -1,0 +1,29 @@
+{
+    "display_width" : 800,
+    "display_height" : 600,
+    "display_caption" : "A car race",
+    
+    "players" : {
+        "_comment" : "This is a sceleton. The actual data will be saved in the players_file.",
+        "players_file" : "players.json",
+        "last_player" : "Racer no 1",
+        "best_score" : 0,
+        "player" : [
+            {
+                "name" : "Racer no 1",
+                "score" : 0,
+                "date" : "-"
+            },
+            {
+                "name" : "Racer no 2",
+                "score" : 0,
+                "date" : "-"
+            },
+            {
+                "name" : "Racer no 3",
+                "score" : 0,
+                "date" : "-"
+            }
+        ]
+    }
+}

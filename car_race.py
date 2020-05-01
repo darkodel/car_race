@@ -92,8 +92,8 @@ def display_message(text, font=smallfont, color=black,\
 def display_button(x, y, width, height, color, caption=None, action=None, action_param=None):
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
-    print(mouse)
-    print(click)
+    #print(mouse)
+    #print(click)
     if y+height > mouse[1] > y and x+width > mouse[0] > x:
         pygame.draw.rect(gameDisplay, color[1], (x, y, width, height))
         if click[0] == 1 and action != None:
@@ -155,7 +155,7 @@ def choose_player():
                 textInput = True
             if textInput:
                 if event.type == pygame.KEYDOWN:
-                    print(event)
+                    #print(event)
                     if event.key == pygame.K_RETURN:
                         new_player(text)
                     elif event.key == pygame.K_BACKSPACE:

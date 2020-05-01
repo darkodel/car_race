@@ -34,15 +34,18 @@ display_caption = config_data['display_caption']
 #Player
 default_player = config_data["players"]["last_player"]
 player = default_player
-player = 'Darko'
+#player = 'Darko'
 
 # Intro buttons
-bIntro_x = (150, 550, 550)
-bIntro_y = (450, 450, 70)
-bIntro_width = 100
-bIntro_height = 50
+""" bIntro_x = (150, 550, 550)
+bIntro_y = (450, 450, 130)
+bIntro_width = (100, 100, 200) """
+bIntro_x = (150, 550, 350)
+bIntro_y = (450, 450, 10)
+bIntro_width = (100, 100, 180)
+bIntro_height = (50, 50, 50)
 bIntro_color = ((green, bright_green), (red, bright_red), (blue, bright_blue))
-bIntro_caption = ('GO!', 'Quit', 'Edit')
+bIntro_caption = ('GO!', 'Quit', 'Change player')
 # game_loop and pause can not be refered before they are defined
 # bIntro_action = (game_loop, pause) is moved to game_intro()
 
@@ -125,14 +128,17 @@ def crash():
         pygame.display.update()
         time.sleep(2)
     else:
-        pause(msg1='Game Over', msg1_font=largefont, msg1_y_displace=-60)
-        
         now = datetime.now()
         time_stamp = now.strftime("%Y-%m-%d %T")
 
         score_history = config.load_score_history()
 
         score_history['last_player'] = player
+        if score_history['best_score'] < dodged:
+            score_history['best_score_player'] = player
+            score_history['best_score'] = dodged
+            score_history['best_score_date'] = time_stamp
+
         # Find/add player and update it's score.
         for p in score_history['player']:
             if p['name'] == player:
@@ -143,7 +149,8 @@ def crash():
                     p['best_score_date'] = time_stamp
 
         config.edit_score_history(score_history)
-
+        
+        pause(msg1='Game Over', msg1_font=largefont, msg1_y_displace=-60)
         lives = 3
         dodged = 0
         fuel_level = 20
@@ -160,6 +167,20 @@ def exit_the_game():
 
 def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
     paused = True
+    
+    if msg1 == 'Game Over':
+        your_last_score, your_best_score, best_score = get_score_history()
+        display_score_history(your_last_score, your_best_score, best_score)
+
+    bIntro_action = (game_loop, pause, edit_player)
+    if gameIntro:
+        gameDisplay.fill(white)
+
+    display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
+    display_message('Press C to Continue or Q to Quit', font=smallfont, color=blue, y_displace=20)
+
+    pygame.display.update()
+
     while paused:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -167,21 +188,37 @@ def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
                     paused = False
                 if event.key == pygame.K_q:
                     exit_the_game()
+        
+        if msg1 == 'Game Over':
+            display_button(bIntro_x[2], bIntro_y[2], bIntro_width[2], bIntro_height[2],\
+                bIntro_color[2], caption=bIntro_caption[2], action=bIntro_action[2])
+            pygame.display.update()
 
-        if gameIntro:
-            gameDisplay.fill(white)
-
-        display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
-        display_message('Press C to Continue or Q to Quit', font=smallfont,\
-            color=blue, y_displace=20)
-
-        pygame.display.update()
         clock.tick(5)
+
+def get_score_history():
+    score_history = config.load_score_history()
+    best_score = score_history['best_score']
+    # Find/add player and update it's score.
+    for p in score_history['player']:
+        if p['name'] == player:
+            your_last_score = p['last_score']
+            your_best_score = p['best_score']
+
+    return(your_last_score, your_best_score, best_score)
+
+def display_score_history(your_last_score, your_best_score, best_score):
+    display_message('Player: ' + player, color=green, center=False, x=550, y=0)
+    display_message('Your last score: ' + str(your_last_score), color=green, center=False, x=550, y=30)
+    display_message('Your best score: ' + str(your_best_score), color=green, center=False, x=550, y=60)
+    display_message('The best score: ' + str(best_score), color=green, center=False, x=550, y=90)
 
 def game_intro():
     # game_loop and pause can not be defined in the begining of this file.
     bIntro_action = (game_loop, pause, edit_player)
 
+    your_last_score, your_best_score, best_score = get_score_history()
+    
     global gameIntro
     while gameIntro:
         for event in pygame.event.get():
@@ -191,11 +228,10 @@ def game_intro():
 
         gameDisplay.fill(white)
         display_message('A car race', font=medfont, color=red, y_displace=-20)
-        display_message('Player:', center=False, x=550, y=0)
-        display_message(player, color=bright_blue, center=False, x=550, y=30)
-        
+        display_score_history(your_last_score, your_best_score, best_score)
+                
         for i in range(len(bIntro_action)):
-            display_button(bIntro_x[i], bIntro_y[i], bIntro_width, bIntro_height,\
+            display_button(bIntro_x[i], bIntro_y[i], bIntro_width[i], bIntro_height[i],\
                 bIntro_color[i], caption=bIntro_caption[i], action=bIntro_action[i])
 
         pygame.display.update()

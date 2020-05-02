@@ -146,7 +146,6 @@ def choose_player():
             if event.type == pygame.QUIT:
                 pause()
                 gameIntro = False
-
         
             # Choose/add player.
             entered = display_button(x_pl, y_pl, width, height, color, caption=text)
@@ -238,7 +237,8 @@ def exit_the_game():
 
 def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
     paused = True
-    
+    global gameIntro
+
     if msg1 == 'Game Over':
         your_last_score, your_best_score, best_score = get_score_history()
         display_score_history(your_last_score, your_best_score, best_score)
@@ -249,7 +249,7 @@ def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
 
     display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
     display_message('Press C to Continue or Q to Quit', font=smallfont, color=blue, y_displace=20)
-
+ 
     pygame.display.update()
 
     while paused:
@@ -257,10 +257,16 @@ def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_c or event.key == pygame.K_SPACE:
                     paused = False
+                    if msg1 == 'Game Over':
+                        gameIntro = True
+                        game_intro()
                 if event.key == pygame.K_q:
                     exit_the_game()
 
-        clock.tick(5)
+        display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
+        display_message('Press C to Continue or Q to Quit', font=smallfont, color=blue, y_displace=20)
+
+        clock.tick(15)
 
 def get_score_history():
     score_history = config.load_score_history()
@@ -280,18 +286,29 @@ def display_score_history(your_last_score, your_best_score, best_score):
     display_message('The best score: ' + str(best_score), color=green, center=False, x=550, y=90)
 
 def game_intro():
+    global gameIntro, lives, dodged, fuel_level
+    gameIntro = True 
+    lives = 3
+    dodged = 0
+    fuel_level = 20
+    
     # game_loop and pause can not be defined in the begining of this file.
     bIntro_action = (game_loop, pause, choose_player)
     
     global your_last_score, your_best_score, best_score
     your_last_score, your_best_score, best_score = get_score_history()
           
-    global gameIntro
     while gameIntro:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pause()
                 gameIntro = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_g:
+                    game_loop()
+                if event.key == pygame.K_q:
+                    exit_the_game()
 
         gameDisplay.fill(white)
         display_message('A car race', font=medfont, color=red, y_displace=-20)

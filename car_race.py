@@ -108,14 +108,26 @@ def display_button(x, y, width, height, color, caption=None, action=None, action
         
     display_message(caption, x=x+(width/2), y=y+(height/2))
 
+def remove_player(player_x):
+    # are you sure
+    if pause(msg1='This will remove player ' + player_x, msg2='y or n'):
+        # remove player
+        #print('Removing player ' + player_x)
+        config.remove_player(player_x)
+    choose_player()
+
 def new_player(new_player):
     score_history = config.load_score_history()
     # Check if this name is available.
     for p in score_history['player']:
         if p['name'] == new_player: # This player already exists.
+            display_message('This player already exists!', font=medfont, color=red)
+            pygame.display.update()
+            time.sleep(2)
+            return
+        else:
+            config.create_new_player(new_player)
             set_player(new_player)
-    config.create_new_player(new_player)
-    set_player(new_player)
 
 def set_player(new_player):
     global choosePlayer, player
@@ -129,10 +141,15 @@ def choose_player():
     choosePlayer = True
     score_history = config.load_score_history()
     
-    x_pl = (display_width/2)-200
+    x_pl = (display_width/2)-200 # x position of buttons with players' names
+    # players' buttons properties
     width = 200
     height = 50
     color = (green, bright_green)
+    # remove player button properties
+    del_but_caption = 'Del'
+    del_but_width = 50
+    del_but_color = (red, bright_red)
     
     text = 'enter new player'
     entered = False
@@ -141,6 +158,7 @@ def choose_player():
     while choosePlayer:
         y_pl = 30
         gameDisplay.fill(white)
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pause()
@@ -166,9 +184,19 @@ def choose_player():
                         text += pygame.key.name(event.key)
             
             y_pl += height+10
+            
             for p in score_history['player']:
+                # remove player button
+                if p['name'] != 'Anonymous':
+                    display_button(x_pl-del_but_width-10, y_pl, del_but_width,\
+                        height, del_but_color, caption=del_but_caption,\
+                        action=remove_player, action_param=p['name'])
+                # player
                 display_button(x_pl, y_pl, width, height, color, caption=p['name'],\
                     action=set_player, action_param=p['name'])
+                #score data
+                display_message('last: '+str(p['last_score'])+', best: '+str(p['best_score']),\
+                    center=False, x=x_pl+width+4, y=y_pl)
                 y_pl += height+10
             
             pygame.display.update()
@@ -234,7 +262,8 @@ def exit_the_game():
     pygame.quit()
     quit()
 
-def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
+def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20,
+msg2='Press C to Continue or Q to Quit'):
     paused = True
     global gameIntro
 
@@ -249,23 +278,29 @@ def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20):
         gameDisplay.fill(white)
 
     display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
-    display_message('Press C to Continue or Q to Quit', font=smallfont, color=blue, y_displace=20)
+    display_message(msg2, font=smallfont, color=blue, y_displace=20)
  
     pygame.display.update()
 
     while paused:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_c or event.key == pygame.K_SPACE:
-                    paused = False
-                    if msg1 == 'Game Over':
-                        gameIntro = True
-                        game_intro()
-                if event.key == pygame.K_q:
-                    exit_the_game()
+                if msg2 != 'y or n':
+                    if event.key == pygame.K_c or event.key == pygame.K_SPACE:
+                        paused = False
+                        if msg1 == 'Game Over':
+                            gameIntro = True
+                            game_intro()
+                    if event.key == pygame.K_q:
+                        exit_the_game()
+                
+                if msg2 == 'y or n' and event.key == pygame.K_y:
+                    return(True)
+                if msg2 == 'y or n' and event.key == pygame.K_n:
+                    return(False)
 
         display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
-        display_message('Press C to Continue or Q to Quit', font=smallfont, color=blue, y_displace=20)
+        display_message(msg2, font=smallfont, color=blue, y_displace=20)
 
         clock.tick(15)
 

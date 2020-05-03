@@ -18,6 +18,16 @@ def create_score_history():
     empty_score_history = data['players']
     edit_score_history(empty_score_history)
 
+def remove_player(player_x):
+    score_history = load_score_history() # load the whole score history
+    for p in score_history['player']:
+        if p['name'] == player_x: # find the element (dictionary) in player list contaning player x
+            score_history['player'].remove(p) # remove that element (dictionary)
+            # If player_x is last_player change it to Anonymous.
+            if score_history['last_player'] == player_x:
+                score_history['last_player'] = 'Anonymous'
+    edit_score_history(score_history) # write it back to the file
+
 def create_new_player(new_player):
     data = load_config()
     new_player_score_history = data['players']['player'] # get player's section
@@ -30,10 +40,8 @@ def load_score_history(score_history_path=CONFIG_PLAYERS):
     try:
         with open(score_history_path) as score_history:
             data = json.load(score_history)
-
     except:
         create_score_history()
         data = load_score_history()
-
     finally:
         return(data)

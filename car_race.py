@@ -89,45 +89,55 @@ def display_message(text, font=smallfont, color=black,\
         textRect = textRect.move(x+x_displace, y+y_displace)
     gameDisplay.blit(textSurf, textRect)
 
-def display_button(x, y, width, height, color, caption=None, action=None, action_param=None):
+def display_button(x, y, width, height, color, caption=None,
+action=None, action_param=None, return_smth=False):
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
+    respond = None
     #print(mouse)
     #print(click)
     if y+height > mouse[1] > y and x+width > mouse[0] > x:
         pygame.draw.rect(gameDisplay, color[1], (x, y, width, height))
         if click[0] == 1 and action != None:
-            if action_param == None:
+            if action_param == None and return_smth == False:
                 action()
-            else:
+            elif action_param == None and return_smth == True:
+                respond = action()
+            elif action_param != None and return_smth == False:
                 action(action_param)
+            else: # action_param != None and return_smth == True
+                respond = action(action_param)
         elif click[0] == 1 and action == None:
             return(True) # button/text fieled has been chosen
     else:
         pygame.draw.rect(gameDisplay, color[0], (x, y, width, height))
         
     display_message(caption, x=x+(width/2), y=y+(height/2))
+    if return_smth == True:
+        return(respond)
 
 def remove_player(player_x):
     # are you sure
     if pause(msg1='This will remove player ' + player_x, msg2='y or n'):
-        # remove player
-        #print('Removing player ' + player_x)
-        config.remove_player(player_x)
-    choose_player()
+        config.remove_player(player_x) # remove player
+        return(True)
+    else:
+        return(False) # the player was not removed
 
 def new_player(new_player):
     score_history = config.load_score_history()
     # Check if this name is available.
+    createPlayer = True
     for p in score_history['player']:
-        if p['name'] == new_player: # This player already exists.
-            display_message('This player already exists!', font=medfont, color=red)
-            pygame.display.update()
-            time.sleep(2)
-            return
-        else:
-            config.create_new_player(new_player)
-            set_player(new_player)
+        if p['name'] == new_player:
+            createPlayer = False # This player already exists.
+    if createPlayer:
+        config.create_new_player(new_player)
+        set_player(new_player)
+    else:
+        display_message('This player already exists!', font=medfont, color=red)
+        pygame.display.update()
+        time.sleep(2)
 
 def set_player(new_player):
     global choosePlayer, player
@@ -139,7 +149,7 @@ def set_player(new_player):
 def choose_player():
     global choosePlayer
     choosePlayer = True
-    score_history = config.load_score_history()
+    reload_score_history = True
     
     x_pl = (display_width/2)-200 # x position of buttons with players' names
     # players' buttons properties
@@ -156,6 +166,9 @@ def choose_player():
     textInput = False
 
     while choosePlayer:
+        if reload_score_history:
+            score_history = config.load_score_history()
+            reload_score_history = False
         y_pl = 30
         gameDisplay.fill(white)
         
@@ -183,24 +196,23 @@ def choose_player():
                         #print(pygame.key.name(event.key))
                         text += pygame.key.name(event.key)
             
-            y_pl += height+10
-            
             for p in score_history['player']:
+                y_pl += height+10
                 # remove player button
                 if p['name'] != 'Anonymous':
-                    display_button(x_pl-del_but_width-10, y_pl, del_but_width,\
+                    if display_button(x_pl-del_but_width-10, y_pl, del_but_width,\
                         height, del_but_color, caption=del_but_caption,\
-                        action=remove_player, action_param=p['name'])
-                # player
+                        action=remove_player, action_param=p['name'], return_smth=True):
+                        reload_score_history = True
+                # player button
                 display_button(x_pl, y_pl, width, height, color, caption=p['name'],\
                     action=set_player, action_param=p['name'])
-                #score data
+                # score data
                 display_message('last: '+str(p['last_score'])+', best: '+str(p['best_score']),\
                     center=False, x=x_pl+width+4, y=y_pl)
-                y_pl += height+10
             
             pygame.display.update()
-            clock.tick(15)
+            clock.tick(30)
 
 def score(dodged):
     display_message('Score: '+str(dodged), color=green, center=False, x=0, y=0)
@@ -268,8 +280,6 @@ msg2='Press C to Continue or Q to Quit'):
     global gameIntro
 
     if msg1 == 'Game Over':
-        """ your_last_score, your_best_score, best_score = get_score_history()
-        display_score_history(your_last_score, your_best_score, best_score) """
         your_last_score, your_best_score, best_score, best_score_player, best_score_date = get_score_history()
         display_score_history(your_last_score, your_best_score, best_score, best_score_player, best_score_date)
 
@@ -337,10 +347,16 @@ def game_intro():
     #bIntro_action = (game_loop, pause, choose_player)
     bIntro_action = (game_loop, exit_the_game, choose_player)
     
+    #reload_score_history = True
     global your_last_score, your_best_score, best_score, best_score_player, best_score_date
     your_last_score, your_best_score, best_score, best_score_player, best_score_date = get_score_history()
-          
+    
     while gameIntro:
+        """ if reload_score_history:
+            your_last_score, your_best_score, best_score, best_score_player,\
+                best_score_date = get_score_history()
+            reload_score_history = False """
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pause()

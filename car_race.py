@@ -395,7 +395,7 @@ def game_loop():
     y_change = 0
     
     # Obstacles
-    objects = [
+    obs = [
         {'type': 'obstacle', 'speed' : 5, 'shape' : 'rect', 'color' : black,\
             'x' : random.randrange(0, display_width), 'y' : -500,\
                 'width' : car_width-20, 'height' : 80, 'line' : 0},
@@ -410,16 +410,46 @@ def game_loop():
                 'radius' : 30, 'line' : 5},        
         {'type': 'obstacle', 'speed' : 5, 'shape' : 'circle', 'slide': 4, 'color' : bright_red,\
             'x' : random.randrange(45, display_width-45), 'y' : -700,\
-                'radius' : 40, 'line' : 10}
+                'radius' : 40, 'line' : 10},
+
+        {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : red,\
+            'x' : random.randrange(0, display_width), 'y' : -100,\
+                'width' : 30, 'height' : 30, 'line' : 0},
+        {'type': 'obstacle', 'speed' : 8, 'shape' : 'rect', 'color' : red,\
+            'x' : random.randrange(0, display_width), 'y' : -300,\
+                'width' : 20, 'height' : 20, 'line' : 0},
+
+        {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : green,\
+            'x' : random.randrange(0, display_width), 'y' : -250,\
+                'width' : 30, 'height' : 30, 'line' : 0},
+        {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
+            'x' : random.randrange(0, display_width), 'y' : -200,\
+                'width' : 40, 'height' : 48}
     ]
     # Goodies
-    objects.extend([
+    """ obs.extend([
         {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
             'x' : random.randrange(0, display_width), 'y' : -500,\
                 'width' : 40, 'height' : 48}
-    ])
+    ]) """
+    obs.insert(0,
+        {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
+            'x' : random.randrange(0, display_width), 'y' : -500,\
+                'width' : 40, 'height' : 48}
+    )
 
+    objects = obs[0:5] #+ obs[10:11]
+    
     while not gameExit:
+        if dodged < 20:
+            objects = obs[0:5]
+        elif 49 > dodged >= 20: #if 99 > dodged >= 50:
+            objects = obs[0:6]
+        elif 79 > dodged >= 50: #elif 149 > dodged >= 100: 
+            objects = obs[0:8]
+        else:
+            objects = obs
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pause()

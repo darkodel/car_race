@@ -340,11 +340,10 @@ def display_score_history(your_last_score, your_best_score, best_score, best_sco
     display_message(str(best_score_date), color=green, center=False, x=550, y=154)
 
 def game_intro():
-    global gameIntro, lives, dodged, fuel_level
-    gameIntro = True 
-    lives = 3
-    dodged = 0
-    fuel_level = 20
+    global gameIntro
+    gameIntro = True
+
+    global lives, dodged, fuel_level
     
     # game_loop and pause can not be defined in the begining of this file.
     #bIntro_action = (game_loop, pause, choose_player)
@@ -355,21 +354,18 @@ def game_intro():
     your_last_score, your_best_score, best_score, best_score_player, best_score_date = get_score_history()
     
     while gameIntro:
-        """ if reload_score_history:
-            your_last_score, your_best_score, best_score, best_score_player,\
-                best_score_date = get_score_history()
-            reload_score_history = False """
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pause()
-                #gameIntro = False
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_g:
-                    game_loop()
+                    #game_loop()
+                    gameIntro = False
                 if event.key == pygame.K_q:
-                    exit_the_game()
+                    #exit_the_game()
+                    gameExit = True
+                    gameIntro = False
 
         gameDisplay.fill(white)
         display_message('A car race', font=medfont, color=red, y_displace=-20)
@@ -383,192 +379,197 @@ def game_intro():
         clock.tick(15)
 
 def game_loop():
-    global gameIntro
-    gameIntro = False
-    global gameExit
+    global gameIntro, gameExit
+    gameIntro = True
     gameExit = False
-    global lives
-    global fuel_level
-    global dodged
 
-    x = (display_width * 0.45)
-    y = (display_height * 0.8)
-    
-    x_change = 0 
-    y_change = 0
-    level = 0
-    
-    # Obstacles
-    obs = [
-        {'type': 'obstacle', 'speed' : 5, 'shape' : 'rect', 'color' : black,\
-            'x' : random.randrange(0, display_width), 'y' : -500,\
-                'width' : car_width-20, 'height' : 80, 'line' : 0},
-        {'type': 'obstacle', 'speed' : 4, 'shape' : 'rect', 'color' : bright_green,\
-            'x' : random.randrange(0, display_width), 'y' : -600,\
-                'width' : car_width-30, 'height' : 120, 'line' : 4},
-        {'type': 'obstacle', 'speed' : 8, 'shape' : 'circle', 'slide': 1, 'color' : bright_blue,\
-            'x' : random.randrange(45, display_width-45), 'y' : -800,\
-                'radius' : 20, 'line' : 0},
-        {'type': 'obstacle', 'speed' : 2, 'shape' : 'circle', 'slide': -2, 'color' : blue,\
-            'x' : random.randrange(45, display_width-45), 'y' : -400,\
-                'radius' : 30, 'line' : 5},        
-        {'type': 'obstacle', 'speed' : 5, 'shape' : 'circle', 'slide': 4, 'color' : bright_red,\
-            'x' : random.randrange(45, display_width-45), 'y' : -700,\
-                'radius' : 40, 'line' : 10},
+    global lives, fuel_level, dodged
+    lives = 3
+    dodged = 0
+    fuel_level = 20
 
-        {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : red,\
-            'x' : random.randrange(0, display_width), 'y' : -100,\
-                'width' : 30, 'height' : 30, 'line' : 0},
-        {'type': 'obstacle', 'speed' : 8, 'shape' : 'rect', 'color' : red,\
-            'x' : random.randrange(0, display_width), 'y' : -300,\
-                'width' : 20, 'height' : 20, 'line' : 0},
+    while gameExit == False:
 
-        {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : green,\
-            'x' : random.randrange(0, display_width), 'y' : -250,\
-                'width' : 30, 'height' : 30, 'line' : 0},
-        {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
-            'x' : random.randrange(0, display_width), 'y' : -200,\
-                'width' : 40, 'height' : 48}
-    ]
-    # Goodies
-    """ obs.extend([
-        {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
-            'x' : random.randrange(0, display_width), 'y' : -500,\
-                'width' : 40, 'height' : 48}
-    ]) """
-    obs.insert(0,
-        {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
-            'x' : random.randrange(0, display_width), 'y' : -500,\
-                'width' : 40, 'height' : 48}
-    )
+        if gameIntro:
+            lives = 3
+            dodged = 0
+            fuel_level = 20
+            game_intro()
 
-    objects = obs[0:5] #+ obs[10:11]
-    
-    while not gameExit:
-        if dodged < 20:
-            objects = obs[0:5]
-            level = 1
-        elif 49 > dodged >= 20: #if 99 > dodged >= 50:
-            objects = obs[0:6]
-            level = 2
-        elif 79 > dodged >= 50: #elif 149 > dodged >= 100: 
-            objects = obs[0:8]
-            level = 3
-        else:
-            objects = obs
-            level = 4
-            
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pause()
+        x = (display_width * 0.45)
+        y = (display_height * 0.8)
+        
+        x_change = 0 
+        y_change = 0
+        level = 0
+        
+        # Obstacles
+        obs = [
+            {'type': 'obstacle', 'speed' : 5, 'shape' : 'rect', 'color' : black,\
+                'x' : random.randrange(0, display_width), 'y' : -500,\
+                    'width' : car_width-20, 'height' : 80, 'line' : 0},
+            {'type': 'obstacle', 'speed' : 4, 'shape' : 'rect', 'color' : bright_green,\
+                'x' : random.randrange(0, display_width), 'y' : -600,\
+                    'width' : car_width-30, 'height' : 120, 'line' : 4},
+            {'type': 'obstacle', 'speed' : 8, 'shape' : 'circle', 'slide': 1, 'color' : bright_blue,\
+                'x' : random.randrange(45, display_width-45), 'y' : -800,\
+                    'radius' : 20, 'line' : 0},
+            {'type': 'obstacle', 'speed' : 2, 'shape' : 'circle', 'slide': -2, 'color' : blue,\
+                'x' : random.randrange(45, display_width-45), 'y' : -400,\
+                    'radius' : 30, 'line' : 5},        
+            {'type': 'obstacle', 'speed' : 5, 'shape' : 'circle', 'slide': 4, 'color' : bright_red,\
+                'x' : random.randrange(45, display_width-45), 'y' : -700,\
+                    'radius' : 40, 'line' : 10},
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    x_change = -5
-                elif event.key == pygame.K_RIGHT:
-                    x_change = 5
-                elif event.key == pygame.K_UP and fuel_level > 0.5:
-                    y_change = -5
-                elif event.key == pygame.K_p or event.key == pygame.K_SPACE:
+            {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : red,\
+                'x' : random.randrange(0, display_width), 'y' : -100,\
+                    'width' : 30, 'height' : 30, 'line' : 0},
+            {'type': 'obstacle', 'speed' : 8, 'shape' : 'rect', 'color' : red,\
+                'x' : random.randrange(0, display_width), 'y' : -300,\
+                    'width' : 20, 'height' : 20, 'line' : 0},
+
+            {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : green,\
+                'x' : random.randrange(0, display_width), 'y' : -250,\
+                    'width' : 30, 'height' : 30, 'line' : 0},
+            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
+                'x' : random.randrange(0, display_width), 'y' : -200,\
+                    'width' : 40, 'height' : 48}
+        ]
+        # Goodies
+        """ obs.extend([
+            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
+                'x' : random.randrange(0, display_width), 'y' : -500,\
+                    'width' : 40, 'height' : 48}
+        ]) """
+        obs.insert(0,
+            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
+                'x' : random.randrange(0, display_width), 'y' : -500,\
+                    'width' : 40, 'height' : 48}
+        )
+
+        objects = obs[0:5] #+ obs[10:11]
+        
+        while not gameExit:
+            if dodged < 20:
+                objects = obs[0:5]
+                level = 1
+            elif 49 > dodged >= 20: #if 99 > dodged >= 50:
+                objects = obs[0:6]
+                level = 2
+            elif 79 > dodged >= 50: #elif 149 > dodged >= 100: 
+                objects = obs[0:8]
+                level = 3
+            else:
+                objects = obs
+                level = 4
+                
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     pause()
 
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    x_change = 0
-                elif event.key == pygame.K_UP:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        x_change = -5
+                    elif event.key == pygame.K_RIGHT:
+                        x_change = 5
+                    elif event.key == pygame.K_UP and fuel_level > 0.5:
+                        y_change = -5
+                    elif event.key == pygame.K_p or event.key == pygame.K_SPACE:
+                        pause()
+
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                        x_change = 0
+                    elif event.key == pygame.K_UP:
+                        y_change = 3
+
+                #print(event)
+            
+            x += x_change
+            y += y_change
+            if y_change == -5:
+                fuel_level += -0.5
+                if fuel_level < 0.5:
                     y_change = 3
 
-            #print(event)
-        
-        x += x_change
-        y += y_change
-        if y_change == -5:
-            fuel_level += -0.5
-            if fuel_level < 0.5:
+            gameDisplay.fill(white)
+
+            # Draw the objects
+            for ob in objects:
+                object(ob)
+                ob['y'] += ob['speed']
+                if ob['shape'] == 'circle':
+                    ob['x'] += ob['slide']
+
+            # Display the car and update the score.
+            car(x,y)
+            score(dodged)
+            refuel(fuel_level)
+            life(lives)
+            levels(level)
+            
+            # Check for colision with the left and right boundary.
+            if x > display_width - car_width or x < 0:
+                crash()
+            
+            # Check for minimum height for the car and deactivate "free falling" if reached.
+            if y > (display_height * 0.8):
+                y = (display_height * 0.8)
+                y_change = 0
+            # Check for maximum height for the car and activate "free falling" if reached.
+            if y < 100:
                 y_change = 3
-
-        gameDisplay.fill(white)
-
-        # Draw the objects
-        for ob in objects:
-            object(ob)
-            ob['y'] += ob['speed']
-            if ob['shape'] == 'circle':
-                ob['x'] += ob['slide']
-
-        # Display the car and update the score.
-        car(x,y)
-        score(dodged)
-        refuel(fuel_level)
-        life(lives)
-        levels(level)
-        
-        # Check for colision with the left and right boundary.
-        if x > display_width - car_width or x < 0:
-            crash()
-        
-        # Check for minimum height for the car and deactivate "free falling" if reached.
-        if y > (display_height * 0.8):
-            y = (display_height * 0.8)
-            y_change = 0
-        # Check for maximum height for the car and activate "free falling" if reached.
-        if y < 100:
-            y_change = 3
-        
-        # Colision and fuel refill detection.
-        for ob in objects:
-            # Rectangles and images have the same shape.
-            if ob['shape'] == 'rect' or ob['shape'] == 'img':
-                if (ob['y']+ob['height'] > y+5 > ob['y'] or y+car_height-5 > ob['y'] > y)\
-                    and (ob['x']+ob['width'] > x+5 and x+car_width-5 > ob['x']):
-                    # Is it obstacle or fuel?
-                    if ob['type'] == 'obstacle':
-                        crash()
-                    # Fuel
-                    elif ob['type'] == 'fuel':
-                        fuel_level += 10
-                        refuel(fuel_level)
+            
+            # Colision and fuel refill detection.
+            for ob in objects:
+                # Rectangles and images have the same shape.
+                if ob['shape'] == 'rect' or ob['shape'] == 'img':
+                    if (ob['y']+ob['height'] > y+5 > ob['y'] or y+car_height-5 > ob['y'] > y)\
+                        and (ob['x']+ob['width'] > x+5 and x+car_width-5 > ob['x']):
+                        # Is it obstacle or fuel?
+                        if ob['type'] == 'obstacle':
+                            crash()
+                        # Fuel
+                        elif ob['type'] == 'fuel':
+                            fuel_level += 10
+                            refuel(fuel_level)
+                            ob['x'] = random.randrange(0, display_width)
+                            ob['y'] = -1 * ob['y'] - 500
+                    elif ob['y'] > display_height:
+                        ob['y'] = 0 - ob['height']
                         ob['x'] = random.randrange(0, display_width)
-                        ob['y'] = -1 * ob['y'] - 500
+                        # Score is only for obstacles.
+                        if ob['type'] == 'obstacle':
+                            dodged += 1
+                
+                elif ob['shape'] == 'circle':
+                    if ob['x']+ob['radius'] > x+15 > ob['x'] or x < ob['x']-ob['radius'] < x+car_width-15:
+                        if ob['y']+ob['radius'] > y+15 > ob['y'] or y < ob['y']-ob['radius'] < y+car_height-15:
+                            crash()
+                    elif ob['y']-ob['radius'] > display_height:
+                        ob['y'] = 0 - ob['radius']
+                        ob['x'] = random.randrange(45, display_width+45)
+                        dodged += 1
+
+                    # If a circle hits the side wall it will bounce or it will be
+                    # teleportated to the other side.
+                    if ob['line'] == 0 and ob['x']-ob['radius'] > display_width:
+                        ob['x'] = 0
+                    if ob['line'] > 0 and (ob['x']+ob['radius'] > display_width\
+                        or ob['x']-ob['radius'] < 0):
+                        ob['slide'] = -1 * ob['slide']
+
                 elif ob['y'] > display_height:
                     ob['y'] = 0 - ob['height']
                     ob['x'] = random.randrange(0, display_width)
-                    # Score is only for obstacles.
-                    if ob['type'] == 'obstacle':
-                        dodged += 1
-            
-            elif ob['shape'] == 'circle':
-                if ob['x']+ob['radius'] > x+15 > ob['x'] or x < ob['x']-ob['radius'] < x+car_width-15:
-                    if ob['y']+ob['radius'] > y+15 > ob['y'] or y < ob['y']-ob['radius'] < y+car_height-15:
-                        crash()
-                elif ob['y']-ob['radius'] > display_height:
-                    ob['y'] = 0 - ob['radius']
-                    ob['x'] = random.randrange(45, display_width+45)
-                    dodged += 1
 
-                # If a circle hits the side wall it will bounce or it will be
-                # teleportated to the other side.
-                if ob['line'] == 0 and ob['x']-ob['radius'] > display_width:
-                    ob['x'] = 0
-                if ob['line'] > 0 and (ob['x']+ob['radius'] > display_width\
-                    or ob['x']-ob['radius'] < 0):
-                    ob['slide'] = -1 * ob['slide']
-
-            elif ob['y'] > display_height:
-                ob['y'] = 0 - ob['height']
-                ob['x'] = random.randrange(0, display_width)
-
-        pygame.display.update()
-        clock.tick(60)
+            pygame.display.update()
+            clock.tick(60)
 
 gameDisplay = pygame.display.set_mode((display_width,display_height))
 pygame.display.set_caption(display_caption)
 clock = pygame.time.Clock()
 
-if not gameExit:
-    if gameIntro:
-        game_intro()
-    game_loop()
+game_loop()
 
-# We should never reach this since exit_the_game() is called from pause()
 exit_the_game()

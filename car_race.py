@@ -223,6 +223,9 @@ def refuel(fuel_level):
 def life(lives, color=blue):
     display_message('Lives: '+str(lives), color=color, center=False, x=0, y=60)
 
+def levels(level, color=blue):
+    display_message('Level: '+str(level), color=color, center=False, x=0, y=90)
+
 def crash():
     global lives
     global fuel_level
@@ -393,6 +396,7 @@ def game_loop():
     
     x_change = 0 
     y_change = 0
+    level = 0
     
     # Obstacles
     obs = [
@@ -443,13 +447,17 @@ def game_loop():
     while not gameExit:
         if dodged < 20:
             objects = obs[0:5]
+            level = 1
         elif 49 > dodged >= 20: #if 99 > dodged >= 50:
             objects = obs[0:6]
+            level = 2
         elif 79 > dodged >= 50: #elif 149 > dodged >= 100: 
             objects = obs[0:8]
+            level = 3
         else:
             objects = obs
-
+            level = 4
+            
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pause()
@@ -493,6 +501,7 @@ def game_loop():
         score(dodged)
         refuel(fuel_level)
         life(lives)
+        levels(level)
         
         # Check for colision with the left and right boundary.
         if x > display_width - car_width or x < 0:

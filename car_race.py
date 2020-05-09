@@ -567,5 +567,3 @@ pygame.display.set_caption(display_caption)
 clock = pygame.time.Clock()
 
 game_loop()
-
-#exit_the_game()

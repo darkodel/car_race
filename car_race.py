@@ -9,7 +9,6 @@ pygame.init()
 config_data = config.load_config()
 
 # Global
-gameExit = False
 gameIntro = True
 choosePlayer = False
 lives = 3
@@ -175,7 +174,7 @@ def choose_player():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pause()
-                gameIntro = False
+                #gameIntro = False
         
             # Choose/add player.
             entered = display_button(x_pl, y_pl, width, height, color, caption=text)
@@ -227,19 +226,18 @@ def levels(level, color=blue):
     display_message('Level: '+str(level), color=color, center=False, x=0, y=90)
 
 def crash():
+    global gameIntro
     global lives
-    global fuel_level
-    global dodged
     score_history = {}
     p = {}
     life(lives, color=white)
     lives += -1
     life(lives)
-    if lives > 0:
+    if lives > 0: # Just a crash. Display the message and return.
         display_message('You Crashed', font=largefont, color=red)
         pygame.display.update()
         time.sleep(2)
-    else:
+    else: # Game Over
         now = datetime.now()
         time_stamp = now.strftime("%Y-%m-%d %T")
 
@@ -263,15 +261,12 @@ def crash():
         config.edit_score_history(score_history)
         
         pause(msg1='Game Over', msg1_font=largefont, msg1_y_displace=-60)
-        lives = 3
-        dodged = 0
-        fuel_level = 20
+        gameIntro = True
 
     # Clean the display to prevent overlapping text
     # in case of pause directly after comming back to game_loop(). 
     gameDisplay.fill(white)
     pygame.display.update()
-    game_loop()
 
 def exit_the_game():
     pygame.quit()
@@ -280,14 +275,12 @@ def exit_the_game():
 def pause(msg1='Paused', msg1_font=medfont, msg1_y_displace=-20,
 msg2='Press C to Continue or Q to Quit'):
     paused = True
-    global gameIntro
 
     if msg1 == 'Game Over':
         your_last_score, your_best_score, best_score, best_score_player, best_score_date = get_score_history()
         display_score_history(your_last_score, your_best_score, best_score, best_score_player, best_score_date)
 
-    bIntro_action = (game_loop, pause, choose_player)
-    if gameIntro:
+    if gameIntro: # if pygame.QUIT during game_intro() clean the screen
         gameDisplay.fill(white)
 
     display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
@@ -301,9 +294,6 @@ msg2='Press C to Continue or Q to Quit'):
                 if msg2 != 'y or n':
                     if event.key == pygame.K_c or event.key == pygame.K_SPACE:
                         paused = False
-                        if msg1 == 'Game Over':
-                            gameIntro = True
-                            game_intro()
                     if event.key == pygame.K_q:
                         exit_the_game()
                 
@@ -339,12 +329,7 @@ def display_score_history(your_last_score, your_best_score, best_score, best_sco
     display_message('by ' + str(best_score_player) + ' on', color=green, center=False, x=550, y=124)
     display_message(str(best_score_date), color=green, center=False, x=550, y=154)
 
-def game_intro():
-    global gameIntro
-    gameIntro = True
-
-    global lives, dodged, fuel_level
-    
+def game_intro():    
     # game_loop and pause can not be defined in the begining of this file.
     #bIntro_action = (game_loop, pause, choose_player)
     bIntro_action = (game_loop, exit_the_game, choose_player)
@@ -353,6 +338,7 @@ def game_intro():
     global your_last_score, your_best_score, best_score, best_score_player, best_score_date
     your_last_score, your_best_score, best_score, best_score_player, best_score_date = get_score_history()
     
+    gameIntro = True
     while gameIntro:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -360,49 +346,53 @@ def game_intro():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_g:
-                    #game_loop()
                     gameIntro = False
                 if event.key == pygame.K_q:
-                    #exit_the_game()
-                    gameExit = True
-                    gameIntro = False
+                    exit_the_game()
 
         gameDisplay.fill(white)
         display_message('A car race', font=medfont, color=red, y_displace=-20)
         display_score_history(your_last_score, your_best_score, best_score, best_score_player, best_score_date)
                 
         for i in range(len(bIntro_action)):
-            display_button(bIntro_x[i], bIntro_y[i], bIntro_width[i], bIntro_height[i],\
-                bIntro_color[i], caption=bIntro_caption[i], action=bIntro_action[i])
+            click = display_button(bIntro_x[i], bIntro_y[i], bIntro_width[i],\
+                bIntro_height[i], bIntro_color[i], caption=bIntro_caption[i])
+            if click:
+                if bIntro_action[i] == game_loop:
+                    gameIntro = False
+                elif bIntro_action[i] == exit_the_game:
+                    exit_the_game()
+                elif bIntro_action[i] == choose_player:
+                    choose_player()
 
         pygame.display.update()
         clock.tick(15)
 
 def game_loop():
-    global gameIntro, gameExit
+    global gameIntro
     gameIntro = True
-    gameExit = False
 
     global lives, fuel_level, dodged
     lives = 3
     dodged = 0
     fuel_level = 20
 
-    while gameExit == False:
+    level = 0
 
+    gameExit = False
+    while not gameExit:
+        x_change = 0 
+        y_change = 0
+
+        lostLife = False
+        
         if gameIntro:
             lives = 3
             dodged = 0
             fuel_level = 20
             game_intro()
+            gameIntro = False
 
-        x = (display_width * 0.45)
-        y = (display_height * 0.8)
-        
-        x_change = 0 
-        y_change = 0
-        level = 0
-        
         # Obstacles
         obs = [
             {'type': 'obstacle', 'speed' : 5, 'shape' : 'rect', 'color' : black,\
@@ -447,9 +437,12 @@ def game_loop():
                     'width' : 40, 'height' : 48}
         )
 
+        x = (display_width * 0.45)
+        y = (display_height * 0.8)
+
         objects = obs[0:5] #+ obs[10:11]
         
-        while not gameExit:
+        while not lostLife:
             if dodged < 20:
                 objects = obs[0:5]
                 level = 1
@@ -511,6 +504,7 @@ def game_loop():
             # Check for colision with the left and right boundary.
             if x > display_width - car_width or x < 0:
                 crash()
+                lostLife = True
             
             # Check for minimum height for the car and deactivate "free falling" if reached.
             if y > (display_height * 0.8):
@@ -529,6 +523,7 @@ def game_loop():
                         # Is it obstacle or fuel?
                         if ob['type'] == 'obstacle':
                             crash()
+                            lostLife = True
                         # Fuel
                         elif ob['type'] == 'fuel':
                             fuel_level += 10
@@ -546,6 +541,7 @@ def game_loop():
                     if ob['x']+ob['radius'] > x+15 > ob['x'] or x < ob['x']-ob['radius'] < x+car_width-15:
                         if ob['y']+ob['radius'] > y+15 > ob['y'] or y < ob['y']-ob['radius'] < y+car_height-15:
                             crash()
+                            lostLife = True
                     elif ob['y']-ob['radius'] > display_height:
                         ob['y'] = 0 - ob['radius']
                         ob['x'] = random.randrange(45, display_width+45)
@@ -572,4 +568,4 @@ clock = pygame.time.Clock()
 
 game_loop()
 
-exit_the_game()
+#exit_the_game()

@@ -393,8 +393,39 @@ def game_loop():
             game_intro()
             gameIntro = False
 
+        # Road line
+        rl_speed = 5
+        rl_width = 10
+        rl_height = 40
+        rl_line = 2
+        road_line = [
+            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
+                'x' : display_width/2, 'y' : 0,\
+                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
+            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
+                'x' : display_width/2, 'y' : 80,\
+                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
+            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
+                'x' : display_width/2, 'y' : 160,\
+                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
+            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
+                'x' : display_width/2, 'y' : 240,\
+                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
+            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
+                'x' : display_width/2, 'y' : 320,\
+                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
+            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
+                'x' : display_width/2, 'y' : 400,\
+                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
+            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
+                'x' : display_width/2, 'y' : 480,\
+                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
+            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
+                'x' : display_width/2, 'y' : 560,\
+                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
+        ]
         # Obstacles
-        obs = [
+        obstacle = [
             {'type': 'obstacle', 'speed' : 5, 'shape' : 'rect', 'color' : black,\
                 'x' : random.randrange(0, display_width), 'y' : -500,\
                     'width' : car_width-20, 'height' : 80, 'line' : 0},
@@ -406,56 +437,79 @@ def game_loop():
                     'radius' : 20, 'line' : 0},
             {'type': 'obstacle', 'speed' : 2, 'shape' : 'circle', 'slide': -2, 'color' : blue,\
                 'x' : random.randrange(45, display_width-45), 'y' : -400,\
-                    'radius' : 30, 'line' : 5},        
+                    'radius' : 30, 'line' : 5}, 
             {'type': 'obstacle', 'speed' : 5, 'shape' : 'circle', 'slide': 4, 'color' : bright_red,\
                 'x' : random.randrange(45, display_width-45), 'y' : -700,\
                     'radius' : 40, 'line' : 10},
-
             {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : red,\
                 'x' : random.randrange(0, display_width), 'y' : -100,\
                     'width' : 30, 'height' : 30, 'line' : 0},
             {'type': 'obstacle', 'speed' : 8, 'shape' : 'rect', 'color' : red,\
                 'x' : random.randrange(0, display_width), 'y' : -300,\
                     'width' : 20, 'height' : 20, 'line' : 0},
-
             {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : green,\
                 'x' : random.randrange(0, display_width), 'y' : -250,\
-                    'width' : 30, 'height' : 30, 'line' : 0},
+                    'width' : 30, 'height' : 30, 'line' : 0}
+        ]     
+        # obstacle.extend([ {'type': ... 'height' : 48} ])
+        # obstacle.insert(0, {'type': ... height' : 48})
+        del obstacle[0]
+        obstacle.insert(0, 
+            {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'file' : 'racecar.png',\
+                'x' : random.randrange(0, display_width), 'y' : -200,\
+                    'width' : 73, 'height' : 83},
+        )
+        del obstacle[4]
+        obstacle.insert(4, 
+            {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'slide': 4, 'file' : 'racecar.png',\
+                'x' : random.randrange(0, display_width), 'y' : -200,\
+                    'width' : 73, 'height' : 83},
+        )
+
+        # Goodies
+        goody = [
+            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
+                'x' : random.randrange(0, display_width), 'y' : -500,\
+                    'width' : 40, 'height' : 48},
             {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
                 'x' : random.randrange(0, display_width), 'y' : -200,\
                     'width' : 40, 'height' : 48}
         ]
-        # Goodies
-        """ obs.extend([
-            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
-                'x' : random.randrange(0, display_width), 'y' : -500,\
-                    'width' : 40, 'height' : 48}
-        ]) """
-        obs.insert(0,
-            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
-                'x' : random.randrange(0, display_width), 'y' : -500,\
-                    'width' : 40, 'height' : 48}
-        )
 
         x = (display_width * 0.45)
         y = (display_height * 0.8)
 
-        objects = obs[0:5] #+ obs[10:11]
-        
+        obj_set = [0]*20
+        # Versions
+        """ obj_set[1] = goody[0:1] + obstacle[0:4]
+        obj_set[2] = goody[0:1] + obstacle[0:5]
+        obj_set[3] = goody[0:1] + obstacle[0:7]
+        obj_set[4] = goody + obstacle """
+        obj_set[1] = road_line + goody[0:1] + obstacle[0:4]
+        obj_set[2] = road_line + goody[0:1] + obstacle[0:5]
+        obj_set[3] = road_line + goody[0:1] + obstacle[0:7]
+        obj_set[4] = road_line + goody + obstacle
+        """ obj_set[1] = road_line + goody[0:1] + obstacle[0:2] + obstacle[5:6]
+        obj_set[2] = road_line + goody[0:1] + obstacle[0:2] + obstacle[5:7]
+        obj_set[3] = road_line + goody[0:1] + obstacle[0:2] + obstacle[5:8]
+        obj_set[4] = road_line + goody + obstacle """
+
+        objects = obj_set[1]
+
         while not lostLife:
             if dodged < 20:
-                objects = obs[0:5]
+                objects = obj_set[1] 
                 level = 1
             elif 49 > dodged >= 20: #if 99 > dodged >= 50:
-                objects = obs[0:6]
+                objects = obj_set[2]
                 level = 2
             elif 79 > dodged >= 50: #elif 149 > dodged >= 100: 
-                objects = obs[0:8]
+                objects = obj_set[3]
                 level = 3
             else:
-                objects = obs
+                objects = obj_set[4]
                 level = 4
-                
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pause()
@@ -491,7 +545,8 @@ def game_loop():
             for ob in objects:
                 object(ob)
                 ob['y'] += ob['speed']
-                if ob['shape'] == 'circle':
+                #if ob['shape'] == 'circle':
+                if 'slide' in ob:
                     ob['x'] += ob['slide']
 
             # Display the car and update the score.
@@ -532,7 +587,8 @@ def game_loop():
                             ob['y'] = -1 * ob['y'] - 500
                     elif ob['y'] > display_height:
                         ob['y'] = 0 - ob['height']
-                        ob['x'] = random.randrange(0, display_width)
+                        if ob['type'] != 'road_line':
+                            ob['x'] = random.randrange(0, display_width)
                         # Score is only for obstacles.
                         if ob['type'] == 'obstacle':
                             dodged += 1

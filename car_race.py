@@ -19,6 +19,8 @@ fuel_level = 20
 # RGB - Read Green Blue
 black           =   (0,0,0)
 white           =   (255,255,255)
+grey_1          =   (184,184,148)
+grey_2          =   (122, 122, 82)
 red             =   (200,0,0)
 green           =   (0,200,0)
 blue            =   (0,0,200)
@@ -29,6 +31,7 @@ bright_blue     =   (0,0,255)
 # Display
 display_width   = 800
 display_height  = 600
+display_color   = grey_2
 display_caption = config_data['display_caption']
 
 #Player
@@ -170,7 +173,7 @@ def choose_player():
             score_history = config.load_score_history()
             reload_score_history = False
         y_pl = 30
-        gameDisplay.fill(white)
+        gameDisplay.fill(display_color)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -266,7 +269,7 @@ def crash():
 
     # Clean the display to prevent overlapping text
     # in case of pause directly after comming back to game_loop(). 
-    gameDisplay.fill(white)
+    gameDisplay.fill(display_color)
     pygame.display.update()
 
 def exit_the_game():
@@ -282,7 +285,7 @@ msg2='Press C to Continue or Q to Quit'):
         display_score_history(your_last_score, your_best_score, best_score, best_score_player, best_score_date)
 
     if gameIntro: # if pygame.QUIT during game_intro() clean the screen
-        gameDisplay.fill(white)
+        gameDisplay.fill(display_color)
 
     display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
     display_message(msg2, font=smallfont, color=blue, y_displace=20)
@@ -351,7 +354,7 @@ def game_intro():
                 if event.key == pygame.K_q:
                     exit_the_game()
 
-        gameDisplay.fill(white)
+        gameDisplay.fill(display_color)
         display_message('A car race', font=medfont, color=red, y_displace=-20)
         display_score_history(your_last_score, your_best_score, best_score, best_score_player, best_score_date)
                 
@@ -546,7 +549,7 @@ def game_loop():
                 if fuel_level < 0.5:
                     y_change = 3
 
-            gameDisplay.fill(white)
+            gameDisplay.fill(display_color)
 
             # Draw the objects
             for ob in objects:

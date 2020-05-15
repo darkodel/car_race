@@ -1,7 +1,13 @@
+import os
 import json
 
 CONFIG = 'conf/.config.json'
-CONFIG_PLAYERS = 'hist/.config_players.json'
+CONFIG_PLAYERS_DIR = '.hist'
+CONFIG_PLAYERS = CONFIG_PLAYERS_DIR + '/.config_players.json'
+
+def init():
+    if not os.path.exists(CONFIG_PLAYERS_DIR):
+        os.makedirs(CONFIG_PLAYERS_DIR)
 
 def load_config(config_file_path=CONFIG):
     with open(config_file_path) as config_file:

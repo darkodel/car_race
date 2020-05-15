@@ -6,6 +6,7 @@ import config
 
 pygame.init()
 
+config.init()
 config_data = config.load_config()
 
 # Global

@@ -1,7 +1,7 @@
 import json
 
-CONFIG = '.config.json'
-CONFIG_PLAYERS = '.config_players.json'
+CONFIG = 'conf/.config.json'
+CONFIG_PLAYERS = 'hist/.config_players.json'
 
 def load_config(config_file_path=CONFIG):
     with open(config_file_path) as config_file:

@@ -49,7 +49,7 @@ bIntro_color = ((green, bright_green), (red, bright_red), (green, bright_green))
 # bIntro_action = (game_loop, pause) is moved to game_intro()
 
 #Car
-carImg = pygame.image.load('racecar.png')
+carImg = pygame.image.load('img/racecar.png')
 car_width = 73
 car_height = 83
 
@@ -455,23 +455,29 @@ def game_loop():
         # obstacle.insert(0, {'type': ... height' : 48})
         del obstacle[0]
         obstacle.insert(0, 
-            {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'file' : 'racecar.png',\
+            {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'file' : 'img/racecar_red_yellow.png',\
                 'x' : random.randrange(0, display_width), 'y' : -200,\
+                    'width' : 73, 'height' : 83},
+        )
+        del obstacle[1]
+        obstacle.insert(1, 
+            {'type': 'obstacle', 'speed' : 4, 'shape' : 'img', 'file' : 'img/racecar_yellow_turquoise.png',\
+                'x' : random.randrange(0, display_width), 'y' : -500,\
                     'width' : 73, 'height' : 83},
         )
         del obstacle[4]
         obstacle.insert(4, 
-            {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'slide': 4, 'file' : 'racecar.png',\
-                'x' : random.randrange(0, display_width), 'y' : -200,\
+            {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'file' : 'img/racecar_blue_red.png', 'slide': 1,\
+                'x' : random.randrange(0, display_width), 'y' : -50,\
                     'width' : 73, 'height' : 83},
         )
 
         # Goodies
         goody = [
-            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
+            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'img/hydrogen_station-1.png',\
                 'x' : random.randrange(0, display_width), 'y' : -500,\
                     'width' : 40, 'height' : 48},
-            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'hydrogen_station-3.png',\
+            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'img/hydrogen_station-2.png',\
                 'x' : random.randrange(0, display_width), 'y' : -200,\
                     'width' : 40, 'height' : 48}
         ]
@@ -566,13 +572,13 @@ def game_loop():
                 y = (display_height * 0.8)
                 y_change = 0
             # Check for maximum height for the car and activate "free falling" if reached.
-            if y < 100:
+            if y < 5: #100:
                 y_change = 3
             
-            # Colision and fuel refill detection.
             for ob in objects:
                 # Rectangles and images have the same shape.
                 if ob['shape'] == 'rect' or ob['shape'] == 'img':
+                    # Colision and fuel refill detection.
                     if (ob['y']+ob['height'] > y+5 > ob['y'] or y+car_height-5 > ob['y'] > y)\
                         and (ob['x']+ob['width'] > x+5 and x+car_width-5 > ob['x']):
                         # Is it obstacle or fuel?
@@ -585,6 +591,7 @@ def game_loop():
                             refuel(fuel_level)
                             ob['x'] = random.randrange(0, display_width)
                             ob['y'] = -1 * ob['y'] - 500
+                    # End of display - send the object to the top and increase the score if an obstacle.
                     elif ob['y'] > display_height:
                         ob['y'] = 0 - ob['height']
                         if ob['type'] != 'road_line':
@@ -594,10 +601,12 @@ def game_loop():
                             dodged += 1
                 
                 elif ob['shape'] == 'circle':
+                    # Colision detection.
                     if ob['x']+ob['radius'] > x+15 > ob['x'] or x < ob['x']-ob['radius'] < x+car_width-15:
                         if ob['y']+ob['radius'] > y+15 > ob['y'] or y < ob['y']-ob['radius'] < y+car_height-15:
                             crash()
                             lostLife = True
+                    # End of display - send the object to the top and increase the score.
                     elif ob['y']-ob['radius'] > display_height:
                         ob['y'] = 0 - ob['radius']
                         ob['x'] = random.randrange(45, display_width+45)
@@ -611,9 +620,13 @@ def game_loop():
                         or ob['x']-ob['radius'] < 0):
                         ob['slide'] = -1 * ob['slide']
 
-                elif ob['y'] > display_height:
+                """ elif ob['y'] > display_height:
                     ob['y'] = 0 - ob['height']
-                    ob['x'] = random.randrange(0, display_width)
+                    ob['x'] = random.randrange(0, display_width) """
+                
+                if 'slide' in ob and ob['shape'] != 'circle':
+                    if ob['x'] < 0 or ob['x']+ob['width'] > display_width:
+                        ob['slide'] = -1 * ob['slide']
 
             pygame.display.update()
             clock.tick(60)

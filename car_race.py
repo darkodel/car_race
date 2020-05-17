@@ -19,8 +19,7 @@ fuel_level = 20
 # RGB - Read Green Blue
 black           =   (0,0,0)
 white           =   (255,255,255)
-grey_1          =   (184,184,148)
-grey_2          =   (122, 122, 82)
+grey            =   (128, 128, 128)
 red             =   (200,0,0)
 green           =   (0,200,0)
 blue            =   (0,0,200)
@@ -29,23 +28,26 @@ bright_green    =   (0,255,0)
 bright_blue     =   (0,0,255)
 
 # Display
-display_width   = 800
-display_height  = 600
-display_color   = grey_2
-display_caption = config_data['display_caption']
+DSP_WIDTH   = config_data['display']['width']
+DSP_HEIGHT  = config_data['display']['height']
+DSP_COLOR   = locals()[config_data['display']['color']]
+DSP_CAPTION = config_data['display']['caption']
+
+# Road line
+RL_LINE     = config_data['road_line']['line']
+RL_COLOR    = locals()[config_data['road_line']['color']]
+RL_SPEED    = config_data['road_line']['speed']
+RL_WIDTH    = config_data['road_line']['width']
+RL_HEIGHT   = config_data['road_line']['height']
 
 #Player
-#default_player = config_data["players"]["last_player"]
 default_player = config.load_score_history()['last_player']
 player = default_player
 
 # Intro buttons
 bIntro_caption = ('GO!', 'Quit', 'Change player')
-""" bIntro_x = (150, 550, 550)
-bIntro_y = (450, 450, 130)
-bIntro_width = (100, 100, 200) """
-bIntro_x = (150, 550, 350)
-bIntro_y = (450, 450, 10)
+bIntro_x = (DSP_WIDTH/2-200, DSP_WIDTH/2+100, DSP_WIDTH-450) #(150, 550, 350)
+bIntro_y = (DSP_HEIGHT*0.75, DSP_HEIGHT*0.75, 10) #(450, 450, 10)
 bIntro_width = (100, 100, 180)
 bIntro_height = (50, 50, 50)
 bIntro_color = ((green, bright_green), (red, bright_red), (green, bright_green))
@@ -84,7 +86,7 @@ def text_objects(text, font, color=black):
     return textSurface, textSurface.get_rect()
 
 def display_message(text, font=smallfont, color=black,\
-    center=True, x=display_width/2, y=display_height/2, x_displace=0, y_displace=0):
+    center=True, x=DSP_WIDTH/2, y=DSP_HEIGHT/2, x_displace=0, y_displace=0):
     textSurf, textRect = text_objects(text, font, color=color)
     if center:
         textRect.center = (x+x_displace, y+y_displace)
@@ -154,7 +156,7 @@ def choose_player():
     choosePlayer = True
     reload_score_history = True
     
-    x_pl = (display_width/2)-200 # x position of buttons with players' names
+    x_pl = (DSP_WIDTH/2)-200 # x position of buttons with players' names
     # players' buttons properties
     width = 200
     height = 50
@@ -173,7 +175,7 @@ def choose_player():
             score_history = config.load_score_history()
             reload_score_history = False
         y_pl = 30
-        gameDisplay.fill(display_color)
+        gameDisplay.fill(DSP_COLOR)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -234,7 +236,7 @@ def crash():
     global lives
     score_history = {}
     p = {}
-    life(lives, color=white)
+    life(lives, color=DSP_COLOR) # Just overwrite lives and keep the rest as it is.
     lives += -1
     life(lives)
     if lives > 0: # Just a crash. Display the message and return.
@@ -269,7 +271,7 @@ def crash():
 
     # Clean the display to prevent overlapping text
     # in case of pause directly after comming back to game_loop(). 
-    gameDisplay.fill(display_color)
+    gameDisplay.fill(DSP_COLOR)
     pygame.display.update()
 
 def exit_the_game():
@@ -285,7 +287,7 @@ msg2='Press C to Continue or Q to Quit'):
         display_score_history(your_last_score, your_best_score, best_score, best_score_player, best_score_date)
 
     if gameIntro: # if pygame.QUIT during game_intro() clean the screen
-        gameDisplay.fill(display_color)
+        gameDisplay.fill(DSP_COLOR)
 
     display_message(msg1, font=msg1_font, color=red, y_displace=msg1_y_displace)
     display_message(msg2, font=smallfont, color=blue, y_displace=20)
@@ -325,13 +327,13 @@ def get_score_history():
     return(your_last_score, your_best_score, best_score, best_score_player, best_score_date)
 
 def display_score_history(your_last_score, your_best_score, best_score, best_score_player, best_score_date):
-    display_message('player: ' + player, color=green, center=False, x=550, y=0)
-    display_message('your last score: ' + str(your_last_score), color=green, center=False, x=550, y=30)
-    display_message('your best score: ' + str(your_best_score), color=green, center=False, x=550, y=60)
-    display_message('_______________', color=red, center=False, x=550, y=62)
-    display_message('the best score: ' + str(best_score), color=green, center=False, x=550, y=94)
-    display_message('by ' + str(best_score_player) + ' on', color=green, center=False, x=550, y=124)
-    display_message(str(best_score_date), color=green, center=False, x=550, y=154)
+    display_message('player: ' + player, color=green, center=False, x=DSP_WIDTH-250, y=0)
+    display_message('your last score: ' + str(your_last_score), color=green, center=False, x=DSP_WIDTH-250, y=30)
+    display_message('your best score: ' + str(your_best_score), color=green, center=False, x=DSP_WIDTH-250, y=60)
+    display_message('_______________', color=red, center=False, x=DSP_WIDTH-250, y=62)
+    display_message('the best score: ' + str(best_score), color=green, center=False, x=DSP_WIDTH-250, y=94)
+    display_message('by ' + str(best_score_player) + ' on', color=green, center=False, x=DSP_WIDTH-250, y=124)
+    display_message(str(best_score_date), color=green, center=False, x=DSP_WIDTH-250, y=154)
 
 def game_intro():    
     # game_loop and pause can not be defined in the begining of this file.
@@ -354,7 +356,7 @@ def game_intro():
                 if event.key == pygame.K_q:
                     exit_the_game()
 
-        gameDisplay.fill(display_color)
+        gameDisplay.fill(DSP_COLOR)
         display_message('A car race', font=medfont, color=red, y_displace=-20)
         display_score_history(your_last_score, your_best_score, best_score, best_score_player, best_score_date)
                 
@@ -398,61 +400,38 @@ def game_loop():
             gameIntro = False
 
         # Road line
-        rl_speed = 5
-        rl_width = 10
-        rl_height = 40
-        rl_line = 2
-        road_line = [
-            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
-                'x' : display_width/2, 'y' : 0,\
-                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
-            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
-                'x' : display_width/2, 'y' : 80,\
-                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
-            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
-                'x' : display_width/2, 'y' : 160,\
-                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
-            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
-                'x' : display_width/2, 'y' : 240,\
-                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
-            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
-                'x' : display_width/2, 'y' : 320,\
-                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
-            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
-                'x' : display_width/2, 'y' : 400,\
-                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
-            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
-                'x' : display_width/2, 'y' : 480,\
-                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
-            {'type': 'road_line', 'speed' : rl_speed, 'shape' : 'rect', 'color' : black,\
-                'x' : display_width/2, 'y' : 560,\
-                    'width' : rl_width, 'height' : rl_height, 'line' : rl_line},
-        ]
+        road_line = []
+        for rl in range(0, DSP_HEIGHT, 2*RL_HEIGHT):
+            road_line2 = {'type': 'road_line', 'speed' : RL_SPEED, 'shape' : 'rect', 'color' : RL_COLOR,\
+                'x' : DSP_WIDTH/2, 'y' : rl,\
+                    'width' : RL_WIDTH, 'height' : RL_HEIGHT, 'line' : RL_LINE}
+            road_line.append(road_line2)
+
         # Obstacles
         obstacle = [
             {'type': 'obstacle', 'speed' : 5, 'shape' : 'rect', 'color' : black,\
-                'x' : random.randrange(0, display_width), 'y' : -500,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -500,\
                     'width' : car_width-20, 'height' : 80, 'line' : 0},
             {'type': 'obstacle', 'speed' : 4, 'shape' : 'rect', 'color' : bright_green,\
-                'x' : random.randrange(0, display_width), 'y' : -600,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -600,\
                     'width' : car_width-30, 'height' : 120, 'line' : 4},
             {'type': 'obstacle', 'speed' : 8, 'shape' : 'circle', 'slide': 1, 'color' : bright_blue,\
-                'x' : random.randrange(45, display_width-45), 'y' : -800,\
+                'x' : random.randrange(45, DSP_WIDTH-45), 'y' : -800,\
                     'radius' : 20, 'line' : 0},
             {'type': 'obstacle', 'speed' : 2, 'shape' : 'circle', 'slide': -2, 'color' : blue,\
-                'x' : random.randrange(45, display_width-45), 'y' : -400,\
+                'x' : random.randrange(45, DSP_WIDTH-45), 'y' : -400,\
                     'radius' : 30, 'line' : 5}, 
             {'type': 'obstacle', 'speed' : 5, 'shape' : 'circle', 'slide': 4, 'color' : bright_red,\
-                'x' : random.randrange(45, display_width-45), 'y' : -700,\
+                'x' : random.randrange(45, DSP_WIDTH-45), 'y' : -700,\
                     'radius' : 40, 'line' : 10},
             {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : red,\
-                'x' : random.randrange(0, display_width), 'y' : -100,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -100,\
                     'width' : 30, 'height' : 30, 'line' : 0},
             {'type': 'obstacle', 'speed' : 8, 'shape' : 'rect', 'color' : red,\
-                'x' : random.randrange(0, display_width), 'y' : -300,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -300,\
                     'width' : 20, 'height' : 20, 'line' : 0},
             {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : green,\
-                'x' : random.randrange(0, display_width), 'y' : -250,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -250,\
                     'width' : 30, 'height' : 30, 'line' : 0}
         ]     
         # obstacle.extend([ {'type': ... 'height' : 48} ])
@@ -460,34 +439,40 @@ def game_loop():
         del obstacle[0]
         obstacle.insert(0, 
             {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'file' : 'img/racecar_red_yellow.png',\
-                'x' : random.randrange(0, display_width), 'y' : -200,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -200,\
                     'width' : 73, 'height' : 83},
         )
         del obstacle[1]
         obstacle.insert(1, 
             {'type': 'obstacle', 'speed' : 4, 'shape' : 'img', 'file' : 'img/racecar_yellow_turquoise.png',\
-                'x' : random.randrange(0, display_width), 'y' : -500,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -500,\
                     'width' : 73, 'height' : 83},
+        )
+        del obstacle[2]
+        obstacle.insert(2, 
+            {'type': 'obstacle', 'speed' : 8, 'shape' : 'img', 'file' : 'img/motorbike.png', 'slide': 1,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -800,\
+                    'width' : 47, 'height' : 69},
         )
         del obstacle[4]
         obstacle.insert(4, 
             {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'file' : 'img/racecar_blue_red.png', 'slide': 1,\
-                'x' : random.randrange(0, display_width), 'y' : -50,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -50,\
                     'width' : 73, 'height' : 83},
         )
 
         # Goodies
         goody = [
             {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'img/hydrogen_station-1.png',\
-                'x' : random.randrange(0, display_width), 'y' : -500,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -500,\
                     'width' : 40, 'height' : 48},
             {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'img/hydrogen_station-2.png',\
-                'x' : random.randrange(0, display_width), 'y' : -200,\
+                'x' : random.randrange(0, DSP_WIDTH), 'y' : -200,\
                     'width' : 40, 'height' : 48}
         ]
 
-        x = (display_width * 0.45)
-        y = (display_height * 0.8)
+        x = (DSP_WIDTH * 0.45)
+        y = (DSP_HEIGHT * 0.8)
 
         obj_set = [0]*20
         # Versions
@@ -549,13 +534,12 @@ def game_loop():
                 if fuel_level < 0.5:
                     y_change = 3
 
-            gameDisplay.fill(display_color)
+            gameDisplay.fill(DSP_COLOR)
 
             # Draw the objects
             for ob in objects:
                 object(ob)
                 ob['y'] += ob['speed']
-                #if ob['shape'] == 'circle':
                 if 'slide' in ob:
                     ob['x'] += ob['slide']
 
@@ -567,13 +551,13 @@ def game_loop():
             levels(level)
             
             # Check for colision with the left and right boundary.
-            if x > display_width - car_width or x < 0:
+            if x > DSP_WIDTH - car_width or x < 0:
                 crash()
                 lostLife = True
             
             # Check for minimum height for the car and deactivate "free falling" if reached.
-            if y > (display_height * 0.8):
-                y = (display_height * 0.8)
+            if y > (DSP_HEIGHT * 0.8):
+                y = (DSP_HEIGHT * 0.8)
                 y_change = 0
             # Check for maximum height for the car and activate "free falling" if reached.
             if y < 5: #100:
@@ -593,13 +577,13 @@ def game_loop():
                         elif ob['type'] == 'fuel':
                             fuel_level += 10
                             refuel(fuel_level)
-                            ob['x'] = random.randrange(0, display_width)
+                            ob['x'] = random.randrange(0, DSP_WIDTH)
                             ob['y'] = -1 * ob['y'] - 500
                     # End of display - send the object to the top and increase the score if an obstacle.
-                    elif ob['y'] > display_height:
+                    elif ob['y'] > DSP_HEIGHT:
                         ob['y'] = 0 - ob['height']
                         if ob['type'] != 'road_line':
-                            ob['x'] = random.randrange(0, display_width)
+                            ob['x'] = random.randrange(0, DSP_WIDTH)
                         # Score is only for obstacles.
                         if ob['type'] == 'obstacle':
                             dodged += 1
@@ -611,32 +595,32 @@ def game_loop():
                             crash()
                             lostLife = True
                     # End of display - send the object to the top and increase the score.
-                    elif ob['y']-ob['radius'] > display_height:
+                    elif ob['y']-ob['radius'] > DSP_HEIGHT:
                         ob['y'] = 0 - ob['radius']
-                        ob['x'] = random.randrange(45, display_width+45)
+                        ob['x'] = random.randrange(45, DSP_WIDTH+45)
                         dodged += 1
 
                     # If a circle hits the side wall it will bounce or it will be
                     # teleportated to the other side.
-                    if ob['line'] == 0 and ob['x']-ob['radius'] > display_width:
+                    if ob['line'] == 0 and ob['x']-ob['radius'] > DSP_WIDTH:
                         ob['x'] = 0
-                    if ob['line'] > 0 and (ob['x']+ob['radius'] > display_width\
+                    if ob['line'] > 0 and (ob['x']+ob['radius'] > DSP_WIDTH\
                         or ob['x']-ob['radius'] < 0):
                         ob['slide'] = -1 * ob['slide']
 
-                """ elif ob['y'] > display_height:
+                """ elif ob['y'] > DSP_HEIGHT:
                     ob['y'] = 0 - ob['height']
-                    ob['x'] = random.randrange(0, display_width) """
+                    ob['x'] = random.randrange(0, DSP_WIDTH) """
                 
                 if 'slide' in ob and ob['shape'] != 'circle':
-                    if ob['x'] < 0 or ob['x']+ob['width'] > display_width:
+                    if ob['x'] < 0 or ob['x']+ob['width'] > DSP_WIDTH:
                         ob['slide'] = -1 * ob['slide']
 
             pygame.display.update()
             clock.tick(60)
 
-gameDisplay = pygame.display.set_mode((display_width,display_height))
-pygame.display.set_caption(display_caption)
+gameDisplay = pygame.display.set_mode((DSP_WIDTH,DSP_HEIGHT))
+pygame.display.set_caption(DSP_CAPTION)
 clock = pygame.time.Clock()
 
 game_loop()

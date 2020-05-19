@@ -12,6 +12,22 @@
         "width" : 6,
         "height" : 40
     },
+    "levels" : {
+        "lives" : 3,
+        "fuel_level" : 20,
+        "l1" : {
+            "speed" : 3
+        },
+        "l2" : {
+            "speed" : 4
+        },
+        "l3" : {
+            "speed" : 5
+        },
+        "l4" : {
+            "speed" : 5
+        }
+    },
 
     "_comment" : "This is a sceleton. The actual data will be saved in the players_file.",
     

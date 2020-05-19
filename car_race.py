@@ -9,12 +9,8 @@ pygame.init()
 config.init()
 config_data = config.load_config()
 
-# Global
-gameIntro = True
-choosePlayer = False
-lives = 3
-dodged = 0
-fuel_level = 20
+# Demo and debug
+NO_CRASH = False
 
 # RGB - Read Green Blue
 black           =   (0,0,0)
@@ -33,10 +29,29 @@ DSP_HEIGHT  = config_data['display']['height']
 DSP_COLOR   = locals()[config_data['display']['color']]
 DSP_CAPTION = config_data['display']['caption']
 
+# Levels
+LIVES       = config_data['levels']['lives']
+FUEL_LEVEL  = config_data['levels']['fuel_level']
+L1_SPEED    = config_data['levels']['l1']['speed']
+L2_SPEED    = config_data['levels']['l2']['speed']
+L3_SPEED    = config_data['levels']['l3']['speed']
+L4_SPEED    = config_data['levels']['l4']['speed']
+SPEED = [0, L1_SPEED, L2_SPEED, L3_SPEED, L4_SPEED]
+
+# Global
+gameIntro = True
+choosePlayer = False
+lives = LIVES
+fuel_level = FUEL_LEVEL
+speed = SPEED[1]
+dodged = 0
+level = 1
+
 # Road line
 RL_LINE     = config_data['road_line']['line']
 RL_COLOR    = locals()[config_data['road_line']['color']]
-RL_SPEED    = config_data['road_line']['speed']
+#RL_SPEED    = config_data['road_line']['speed']
+#RL_SPEED    = speed
 RL_WIDTH    = config_data['road_line']['width']
 RL_HEIGHT   = config_data['road_line']['height']
 
@@ -234,6 +249,13 @@ def life(lives, color=blue):
 def levels(level, color=blue):
     display_message('Level: '+str(level), color=color, center=False, x=0, y=90)
 
+def collision_detection(ob, other_ob):
+    """ print(ob)
+    print(other_ob) """
+    if (ob['y']+ob['height'] > other_ob['y']+5 > ob['y'] or other_ob['y']+other_ob['height']-5 > ob['y'] > other_ob['y'])\
+        and (ob['x']+ob['width'] > other_ob['x']+5 and other_ob['x']+other_ob['width']-5 > ob['x']):
+        return True #print('COLLISION')
+
 def crash():
     global gameIntro
     global lives
@@ -338,6 +360,14 @@ def display_score_history(your_last_score, your_best_score, best_score, best_sco
     display_message('by ' + str(best_score_player) + ' on', color=green, center=False, x=DSP_WIDTH-250, y=124)
     display_message(str(best_score_date), color=green, center=False, x=DSP_WIDTH-250, y=154)
 
+def set_level1():
+    global lives, fuel_level, speed, dodged, level
+    lives = 3
+    fuel_level = 20
+    speed = L1_SPEED
+    dodged = 0
+    level = 1
+
 def game_intro():    
     # game_loop and pause can not be defined in the begining of this file.
     #bIntro_action = (game_loop, pause, choose_player)
@@ -381,12 +411,8 @@ def game_loop():
     global gameIntro
     gameIntro = True
 
-    global lives, fuel_level, dodged
-    lives = 3
-    dodged = 0
-    fuel_level = 20
-
-    level = 0
+    global lives, fuel_level, speed, dodged, level
+    set_level1()
 
     gameExit = False
     while not gameExit:
@@ -396,44 +422,42 @@ def game_loop():
         lostLife = False
         
         if gameIntro:
-            lives = 3
-            dodged = 0
-            fuel_level = 20
+            set_level1()
             game_intro()
             gameIntro = False
 
         # Road line
         road_line = []
         for rl in range(0, DSP_HEIGHT, 2*RL_HEIGHT):
-            road_line2 = {'type': 'road_line', 'speed' : RL_SPEED, 'shape' : 'rect', 'color' : RL_COLOR,\
-                'x' : DSP_WIDTH/2, 'y' : rl,\
-                    'width' : RL_WIDTH, 'height' : RL_HEIGHT, 'line' : RL_LINE}
+            road_line2 = {'type':'road_line', 'shape':'rect', 'color':RL_COLOR,
+                'width':RL_WIDTH, 'height':RL_HEIGHT, 'line':RL_LINE, 'speed':0,
+                'x':DSP_WIDTH/2, 'y':rl}
             road_line.append(road_line2)
 
         # Obstacles
         obstacle = [
-            {'type': 'obstacle', 'speed' : 5, 'shape' : 'rect', 'color' : black,\
+            {'type': 'obstacle', 'speed':0, 'shape' : 'rect', 'color' : black,\
                 'x' : random_x(), 'y' : -500,\
                     'width' : car_width-20, 'height' : 80, 'line' : 0},
-            {'type': 'obstacle', 'speed' : 4, 'shape' : 'rect', 'color' : bright_green,\
+            {'type': 'obstacle', 'speed':-1, 'shape' : 'rect', 'color' : bright_green,\
                 'x' : random_x(), 'y' : -600,\
                     'width' : car_width-30, 'height' : 120, 'line' : 4},
-            {'type': 'obstacle', 'speed' : 8, 'shape' : 'circle', 'slide': 1, 'color' : bright_blue,\
+            {'type': 'obstacle', 'speed':3, 'shape' : 'circle', 'slide': 1, 'color' : bright_blue,\
                 'x' : random.randrange(45, DSP_WIDTH-45), 'y' : -800,\
                     'radius' : 20, 'line' : 0},
-            {'type': 'obstacle', 'speed' : 2, 'shape' : 'circle', 'slide': -2, 'color' : blue,\
+            {'type': 'obstacle', 'speed':-2, 'shape' : 'circle', 'slide': -2, 'color' : blue,\
                 'x' : random.randrange(45, DSP_WIDTH-45), 'y' : -400,\
                     'radius' : 30, 'line' : 5}, 
-            {'type': 'obstacle', 'speed' : 5, 'shape' : 'circle', 'slide': 4, 'color' : bright_red,\
+            {'type': 'obstacle', 'speed':0, 'shape' : 'circle', 'slide': 4, 'color' : bright_red,\
                 'x' : random.randrange(45, DSP_WIDTH-45), 'y' : -700,\
                     'radius' : 40, 'line' : 10},
-            {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : red,\
+            {'type': 'obstacle', 'speed':1, 'shape' : 'rect', 'color' : red,\
                 'x' : random_x(), 'y' : -100,\
                     'width' : 30, 'height' : 30, 'line' : 0},
-            {'type': 'obstacle', 'speed' : 8, 'shape' : 'rect', 'color' : red,\
+            {'type': 'obstacle', 'speed':3, 'shape' : 'rect', 'color' : red,\
                 'x' : random_x(), 'y' : -300,\
                     'width' : 20, 'height' : 20, 'line' : 0},
-            {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : green,\
+            {'type': 'obstacle', 'speed':1, 'shape' : 'rect', 'color' : green,\
                 'x' : random_x(), 'y' : -250,\
                     'width' : 30, 'height' : 30, 'line' : 0}
         ]     
@@ -442,35 +466,35 @@ def game_loop():
         del obstacle[0]
         obstacle.insert(0, 
             {'type':'obstacle', 'shape':'img', 'file':'img/racecar_red_yellow.png',
-            'width':73, 'height':83, 'speed':5,
+            'width':73, 'height':83, 'speed':0,
             'x':random_x(), 'y':-200},
         )
         del obstacle[1]
         obstacle.insert(1, 
             {'type':'obstacle', 'shape':'img', 'file':'img/racecar_yellow_turquoise.png',
-            'width':73, 'height':83, 'speed':4,
+            'width':73, 'height':83, 'speed':-1,
             'x':random_x(), 'y':-500},
         )
         del obstacle[2]
         obstacle.insert(2, 
             {'type':'obstacle', 'shape':'img', 'file':'img/motorbike.png',
-            'width':47, 'height':69, 'speed':8, 'slide':1, 'coll_resp':'bounce',
+            'width':47, 'height':69, 'speed':+3, 'slide':1, 'coll_resp':'bounce',
             'x':random_x(), 'y':-800},
         )
         del obstacle[4]
         obstacle.insert(4, 
             {'type':'obstacle', 'shape':'img', 'file':'img/racecar_blue_red.png',
-            'width':73, 'height':83, 'speed':5, 'slide':1,
+            'width':73, 'height':83, 'speed':0, 'slide':1, 'coll_resp':'bounce',
             'x':random_x(), 'y':-50},
         )
 
         # Goodies
         goody = [
             {'type':'fuel', 'shape':'img', 'file':'img/hydrogen_station-1.png',
-            'width':40, 'height':48, 'speed':5,
+            'width':40, 'height':48, 'speed':0,
             'x':random_x(), 'y':-500},
             {'type':'fuel', 'shape':'img', 'file':'img/hydrogen_station-2.png',
-            'width':40, 'height':48, 'speed':5,
+            'width':40, 'height':48, 'speed':0,
             'x':random_x(), 'y':-200}
         ]
 
@@ -483,7 +507,7 @@ def game_loop():
         obj_set[2] = goody[0:1] + obstacle[0:5]
         obj_set[3] = goody[0:1] + obstacle[0:7]
         obj_set[4] = goody + obstacle """
-        obj_set[1] = road_line + goody[0:1] + obstacle[0:4]
+        obj_set[1] = road_line + goody[0:1] + obstacle[0:3]
         obj_set[2] = road_line + goody[0:1] + obstacle[0:5]
         obj_set[3] = road_line + goody[0:1] + obstacle[0:7]
         obj_set[4] = road_line + goody + obstacle
@@ -496,17 +520,16 @@ def game_loop():
 
         while not lostLife:
             if dodged < 20:
-                objects = obj_set[1] 
                 level = 1
             elif 49 > dodged >= 20: #if 99 > dodged >= 50:
-                objects = obj_set[2]
                 level = 2
             elif 79 > dodged >= 50: #elif 149 > dodged >= 100: 
-                objects = obj_set[3]
                 level = 3
             else:
-                objects = obj_set[4]
                 level = 4
+
+            objects = obj_set[level]
+            speed = SPEED[level]
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -542,7 +565,7 @@ def game_loop():
             # Draw the objects
             for ob in objects:
                 object(ob)
-                ob['y'] += ob['speed']
+                ob['y'] += ob['speed'] + speed
                 if 'slide' in ob:
                     ob['x'] += ob['slide']
 
@@ -573,7 +596,7 @@ def game_loop():
                     if (ob['y']+ob['height'] > y+5 > ob['y'] or y+car_height-5 > ob['y'] > y)\
                         and (ob['x']+ob['width'] > x+5 and x+car_width-5 > ob['x']):
                         # Is it obstacle or fuel?
-                        if ob['type'] == 'obstacle':
+                        if ob['type'] == 'obstacle' and not NO_CRASH:
                             crash()
                             lostLife = True
                         # Fuel
@@ -595,8 +618,9 @@ def game_loop():
                     # Colision detection.
                     if ob['x']+ob['radius'] > x+15 > ob['x'] or x < ob['x']-ob['radius'] < x+car_width-15:
                         if ob['y']+ob['radius'] > y+15 > ob['y'] or y < ob['y']-ob['radius'] < y+car_height-15:
-                            crash()
-                            lostLife = True
+                            if not NO_CRASH:
+                                crash()
+                                lostLife = True
                     # End of display - send the object to the top and increase the score.
                     elif ob['y']-ob['radius'] > DSP_HEIGHT:
                         ob['y'] = 0 - ob['radius']
@@ -615,6 +639,15 @@ def game_loop():
                     ob['y'] = 0 - ob['height']
                     ob['x'] = random_x() """
                 
+                if 'coll_resp' in ob:
+                    for other_ob in objects:
+                        if other_ob['type'] != 'road_line' and other_ob['type'] != 'fuel' and\
+                            other_ob['shape'] != 'circle' and\
+                                objects.index(ob) != objects.index(other_ob):
+                            if collision_detection(ob, other_ob):
+                                ob['slide'] = -1 * ob['slide']
+
+
                 if 'slide' in ob and ob['shape'] != 'circle':
                     if ob['x'] < 0 or ob['x']+ob['width'] > DSP_WIDTH:
                         ob['slide'] = -1 * ob['slide']

@@ -3,7 +3,7 @@
         "width" : 600,
         "height" : 700,
         "color" : "grey",
-        "caption" : "A car race"
+        "caption" : "Car race"
     },
     "road_line" : {
         "line" : 0,

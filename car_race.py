@@ -219,6 +219,9 @@ def choose_player():
             pygame.display.update()
             clock.tick(30)
 
+def random_x(x1=0, x2=DSP_WIDTH):
+    return random.randrange(x1, x2)
+
 def score(dodged):
     display_message('Score: '+str(dodged), color=green, center=False, x=0, y=0)
 
@@ -410,10 +413,10 @@ def game_loop():
         # Obstacles
         obstacle = [
             {'type': 'obstacle', 'speed' : 5, 'shape' : 'rect', 'color' : black,\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -500,\
+                'x' : random_x(), 'y' : -500,\
                     'width' : car_width-20, 'height' : 80, 'line' : 0},
             {'type': 'obstacle', 'speed' : 4, 'shape' : 'rect', 'color' : bright_green,\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -600,\
+                'x' : random_x(), 'y' : -600,\
                     'width' : car_width-30, 'height' : 120, 'line' : 4},
             {'type': 'obstacle', 'speed' : 8, 'shape' : 'circle', 'slide': 1, 'color' : bright_blue,\
                 'x' : random.randrange(45, DSP_WIDTH-45), 'y' : -800,\
@@ -425,50 +428,50 @@ def game_loop():
                 'x' : random.randrange(45, DSP_WIDTH-45), 'y' : -700,\
                     'radius' : 40, 'line' : 10},
             {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : red,\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -100,\
+                'x' : random_x(), 'y' : -100,\
                     'width' : 30, 'height' : 30, 'line' : 0},
             {'type': 'obstacle', 'speed' : 8, 'shape' : 'rect', 'color' : red,\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -300,\
+                'x' : random_x(), 'y' : -300,\
                     'width' : 20, 'height' : 20, 'line' : 0},
             {'type': 'obstacle', 'speed' : 6, 'shape' : 'rect', 'color' : green,\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -250,\
+                'x' : random_x(), 'y' : -250,\
                     'width' : 30, 'height' : 30, 'line' : 0}
         ]     
         # obstacle.extend([ {'type': ... 'height' : 48} ])
         # obstacle.insert(0, {'type': ... height' : 48})
         del obstacle[0]
         obstacle.insert(0, 
-            {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'file' : 'img/racecar_red_yellow.png',\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -200,\
-                    'width' : 73, 'height' : 83},
+            {'type':'obstacle', 'shape':'img', 'file':'img/racecar_red_yellow.png',
+            'width':73, 'height':83, 'speed':5,
+            'x':random_x(), 'y':-200},
         )
         del obstacle[1]
         obstacle.insert(1, 
-            {'type': 'obstacle', 'speed' : 4, 'shape' : 'img', 'file' : 'img/racecar_yellow_turquoise.png',\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -500,\
-                    'width' : 73, 'height' : 83},
+            {'type':'obstacle', 'shape':'img', 'file':'img/racecar_yellow_turquoise.png',
+            'width':73, 'height':83, 'speed':4,
+            'x':random_x(), 'y':-500},
         )
         del obstacle[2]
         obstacle.insert(2, 
-            {'type': 'obstacle', 'speed' : 8, 'shape' : 'img', 'file' : 'img/motorbike.png', 'slide': 1,\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -800,\
-                    'width' : 47, 'height' : 69},
+            {'type':'obstacle', 'shape':'img', 'file':'img/motorbike.png',
+            'width':47, 'height':69, 'speed':8, 'slide':1, 'coll_resp':'bounce',
+            'x':random_x(), 'y':-800},
         )
         del obstacle[4]
         obstacle.insert(4, 
-            {'type': 'obstacle', 'speed' : 5, 'shape' : 'img', 'file' : 'img/racecar_blue_red.png', 'slide': 1,\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -50,\
-                    'width' : 73, 'height' : 83},
+            {'type':'obstacle', 'shape':'img', 'file':'img/racecar_blue_red.png',
+            'width':73, 'height':83, 'speed':5, 'slide':1,
+            'x':random_x(), 'y':-50},
         )
 
         # Goodies
         goody = [
-            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'img/hydrogen_station-1.png',\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -500,\
-                    'width' : 40, 'height' : 48},
-            {'type': 'fuel', 'speed' : 5, 'shape' : 'img', 'file' : 'img/hydrogen_station-2.png',\
-                'x' : random.randrange(0, DSP_WIDTH), 'y' : -200,\
-                    'width' : 40, 'height' : 48}
+            {'type':'fuel', 'shape':'img', 'file':'img/hydrogen_station-1.png',
+            'width':40, 'height':48, 'speed':5,
+            'x':random_x(), 'y':-500},
+            {'type':'fuel', 'shape':'img', 'file':'img/hydrogen_station-2.png',
+            'width':40, 'height':48, 'speed':5,
+            'x':random_x(), 'y':-200}
         ]
 
         x = (DSP_WIDTH * 0.45)
@@ -577,13 +580,13 @@ def game_loop():
                         elif ob['type'] == 'fuel':
                             fuel_level += 10
                             refuel(fuel_level)
-                            ob['x'] = random.randrange(0, DSP_WIDTH)
+                            ob['x'] = random_x()
                             ob['y'] = -1 * ob['y'] - 500
                     # End of display - send the object to the top and increase the score if an obstacle.
                     elif ob['y'] > DSP_HEIGHT:
                         ob['y'] = 0 - ob['height']
                         if ob['type'] != 'road_line':
-                            ob['x'] = random.randrange(0, DSP_WIDTH)
+                            ob['x'] = random_x()
                         # Score is only for obstacles.
                         if ob['type'] == 'obstacle':
                             dodged += 1
@@ -610,7 +613,7 @@ def game_loop():
 
                 """ elif ob['y'] > DSP_HEIGHT:
                     ob['y'] = 0 - ob['height']
-                    ob['x'] = random.randrange(0, DSP_WIDTH) """
+                    ob['x'] = random_x() """
                 
                 if 'slide' in ob and ob['shape'] != 'circle':
                     if ob['x'] < 0 or ob['x']+ob['width'] > DSP_WIDTH:

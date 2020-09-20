@@ -10,6 +10,7 @@ config.init()
 config_data = config.load_config()
 
 # Demo and debug
+NO_CRASH = True
 NO_CRASH = False
 
 # RGB - Read Green Blue
@@ -234,8 +235,8 @@ def choose_player():
             pygame.display.update()
             clock.tick(30)
 
-def random_x(x1=0, x2=DSP_WIDTH):
-    return random.randrange(x1, x2)
+def random_x(x1=0, x2=DSP_WIDTH, ob_width=0):
+    return random.randrange(x1+ob_width, x2-ob_width)
 
 def score(dodged):
     display_message('Score: '+str(dodged), color=green, center=False, x=0, y=0)
@@ -250,8 +251,6 @@ def levels(level, color=blue):
     display_message('Level: '+str(level), color=color, center=False, x=0, y=90)
 
 def collision_detection(ob, other_ob):
-    """ print(ob)
-    print(other_ob) """
     if (ob['y']+ob['height'] > other_ob['y']+5 > ob['y'] or other_ob['y']+other_ob['height']-5 > ob['y'] > other_ob['y'])\
         and (ob['x']+ob['width'] > other_ob['x']+5 and other_ob['x']+other_ob['width']-5 > ob['x']):
         return True #print('COLLISION')
@@ -467,35 +466,35 @@ def game_loop():
         obstacle.insert(0, 
             {'type':'obstacle', 'shape':'img', 'file':'img/racecar_red_yellow.png',
             'width':73, 'height':83, 'speed':0,
-            'x':random_x(), 'y':-200},
+            'x':random_x(ob_width=73), 'y':-200},
         )
         del obstacle[1]
         obstacle.insert(1, 
             {'type':'obstacle', 'shape':'img', 'file':'img/racecar_yellow_turquoise.png',
-            'width':73, 'height':83, 'speed':-1,
-            'x':random_x(), 'y':-500},
+            'width':73, 'height':83, 'ns':-1, 'speed':-1,
+            'x':random_x(ob_width=73), 'y':-500},
         )
         del obstacle[2]
         obstacle.insert(2, 
-            {'type':'obstacle', 'shape':'img', 'file':'img/motorbike.png',
-            'width':47, 'height':69, 'speed':+3, 'slide':1, 'coll_resp':'bounce',
-            'x':random_x(), 'y':-800},
+            {'type':'obstacle', 'shape':'img', 'file':'img/motorbike-red-right.png',
+            'width':35, 'height':69, 'speed':+3, 'slide':1, 'coll_resp':'avoid',
+            'x':random_x(ob_width=35), 'y':-800},
         )
         del obstacle[4]
         obstacle.insert(4, 
             {'type':'obstacle', 'shape':'img', 'file':'img/racecar_blue_red.png',
-            'width':73, 'height':83, 'speed':0, 'slide':1, 'coll_resp':'bounce',
-            'x':random_x(), 'y':-50},
+            'width':73, 'height':83, 'speed':0, 'slide':1, 'coll_resp':'avoid',
+            'x':random_x(ob_width=73), 'y':-50},
         )
 
         # Goodies
         goody = [
             {'type':'fuel', 'shape':'img', 'file':'img/hydrogen_station-1.png',
             'width':40, 'height':48, 'speed':0,
-            'x':random_x(), 'y':-500},
+            'x':random_x(ob_width=40), 'y':-500},
             {'type':'fuel', 'shape':'img', 'file':'img/hydrogen_station-2.png',
             'width':40, 'height':48, 'speed':0,
-            'x':random_x(), 'y':-200}
+            'x':random_x(ob_width=40), 'y':-200}
         ]
 
         x = (DSP_WIDTH * 0.45)
@@ -603,13 +602,13 @@ def game_loop():
                         elif ob['type'] == 'fuel':
                             fuel_level += 10
                             refuel(fuel_level)
-                            ob['x'] = random_x()
+                            ob['x'] = random_x(ob_width=ob['width'])
                             ob['y'] = -1 * ob['y'] - 500
                     # End of display - send the object to the top and increase the score if an obstacle.
                     elif ob['y'] > DSP_HEIGHT:
                         ob['y'] = 0 - ob['height']
                         if ob['type'] != 'road_line':
-                            ob['x'] = random_x()
+                            ob['x'] = random_x(ob_width=ob['width'])
                         # Score is only for obstacles.
                         if ob['type'] == 'obstacle':
                             dodged += 1
@@ -645,8 +644,15 @@ def game_loop():
                             other_ob['shape'] != 'circle' and\
                                 objects.index(ob) != objects.index(other_ob):
                             if collision_detection(ob, other_ob):
-                                ob['slide'] = -1 * ob['slide']
-
+                                if ob['coll_resp'] == 'avoid':
+                                    if 'slide' in ob:
+                                        ob['slide'] = -1 * ob['slide']
+                                    elif 'slide' in other_ob:
+                                        other_ob['slide'] = -1 * other_ob['slide']
+                                    """ elif ob['speed'] > other_ob['speed']:
+                                        ob['speed'] += -1
+                                    else:
+                                        other_ob['speed'] += -1 """
 
                 if 'slide' in ob and ob['shape'] != 'circle':
                     if ob['x'] < 0 or ob['x']+ob['width'] > DSP_WIDTH:
